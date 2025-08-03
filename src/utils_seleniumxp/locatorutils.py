@@ -26,8 +26,6 @@ module providing Selenium locator tools
 
 from typing import NamedTuple, Optional, Union
 
-# from dataclasses import dataclass
-
 import parsel
 import re
 

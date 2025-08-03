@@ -77,7 +77,6 @@ import signal
 
 import requests
 
-# from selenium_stealth import stealth
 from stealthenium import stealth
 
 import utils_seleniumxp.eventfiring_addon
@@ -300,7 +299,6 @@ def init_webdriver(
                     sessionstartlog.info(f"- {key}: {value}")
 
         # settings for Chrome
-        # browsersettings.add_argument("--disable-features=UserAgentClientHint")
         browsersettings.add_argument("--disable-features=UserAgentClientHint,OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints")
         browsersettings.add_argument("--disable-search-engine-choice-screen")
         # settings in addition to stealth extension from stackoverflow
@@ -433,29 +431,6 @@ def init_webdriver(
                 }
             )
             # solve wrapping issue for EventFiringWebDriver
-            # if hasattr(webdriver, "wrapped_driver"):
-            #     stealth(
-            #         driver=webdriver.wrapped_driver,
-            #         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            #         languages=["en-US", "en", "de-DE", "de"],
-            #         vendor="Google Inc.",
-            #         platform="Win32",
-            #         webgl_vendor="Intel Inc.",
-            #         renderer="Intel Iris OpenGL Engine",
-            #         fix_hairline=True
-            #    )
-            # else:
-            #     stealth(
-            #         driver=webdriver,
-            #         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-            #         languages=["en-US", "en", "de-DE", "de"],
-            #         vendor="Google Inc.",
-            #         platform="Win32",
-            #         webgl_vendor="Intel Inc.",
-            #         renderer="Intel Iris OpenGL Engine",
-            #         fix_hairline=True
-            #     )
-            # simplify code
             webdriver_temp = webdriver.wrapped_driver if hasattr(webdriver, "wrapped_driver") else webdriver
             stealth(
                 driver=webdriver_temp,
@@ -565,7 +540,6 @@ def check_debugport(debugport: int) -> bool:
     except Exception:
         return False
 
-    # checkDbgPortOK = (response.status_code == 200) and (response.text.find("!doctype html") >= 0)
     checkDbgPortOK = ((response.status_code == 200) and (response.reason == "OK"))
 
     return checkDbgPortOK
@@ -749,7 +723,6 @@ def check_configpath(
     checkpath: str = config.get(inisection, configparampath, fallback="")
 
     if checkpath != "":
-        # checkpath = os.path.expandvars(config._sections[inisection][configparampath])
         checkpath = os.path.expandvars(checkpath)
         if binaryfile:
             if os.path.isdir(checkpath):
@@ -973,10 +946,6 @@ def kill_driver_processes(browser: str = "chrome", pid=None):
         raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
     driverbinary: str = supported_browsers[browser][1]
-    # try:
-    #     psutil.Process(pid).send_signal(signal.SIGTERM)
-    # except psutil.NoSuchProcess:
-    #     pass
     with contextlib.suppress(psutil.NoSuchProcess):
         psutil.Process(pid).send_signal(signal.SIGTERM)
     pids: list = []

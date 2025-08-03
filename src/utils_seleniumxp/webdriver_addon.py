@@ -427,7 +427,7 @@ def find_elements_shadowdom(
             if shadowroot.__class__.__name__ != "ShadowRoot":
                 # overcome issue that ShadwoDOM host but not root is provided, try to treat shadowroot as host to derive correct root
                 shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowroot)
-            # overcome issue with id attribute, discovered missing in JSON return when  accessing shadow root in May 2025
+            # overcome issue with id attribute, discovered missing in JSON return when accessing shadow root in May 2025
             if not hasattr(shadowroot, "id"):
                 shadowroot.id = shadowroot._id
             try:
@@ -740,7 +740,6 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                     else:
                         frames = webdriver.find_elements(*locator_iframe)
                     if len(frames) == 0:
-                        # raise utils_seleniumxp.ErrorUtilsSelenium(f"FRAME selector {locator_iframe} not found.")
                         if hasattr(webdriver, "closepopup_logger"):
                             webdriver.closepopup_logger.info(f"FRAME not found\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
@@ -751,7 +750,6 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                             ):
                             parsedhtml = utils_seleniumxp.locatorutils.parselSelectorExtension(text=webdriver.page_source)
                     elif len(frames) > 1:
-                        # raise utils_seleniumxp.ErrorUtilsSelenium(f"FRAME selector {locator_iframe} not unique.")
                         if hasattr(webdriver, "closepopup_logger"):
                             webdriver.closepopup_logger.info(f"FRAME not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
@@ -773,17 +771,10 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                         continue
                     elif len(shadowhosts) == 1:
                         shadowhost = webdriver.find_element(*locator_shadowdomhost)
-                        # Selenium 3 with Chrome-webdriver chromedriver.exe 96.x
-                        # https://titusfortner.com/2021/11/22/shadow-dom-selenium.html
-                        # shadowroot_dict = webdriver.execute_script('return arguments[0].shadowRoot', shadowhost)
-                        # shadowroot_id = shadowroot_dict['shadow-6066-11e4-a52e-4f735466cecf']
-                        # shadowroot = utils_seleniumxp._WebElement(webdriver, shadowroot_id, w3c=True)
-                        # Selenium 3 with Chrome-webdriver chromedriver.exe before 96.x or Selenium 4.x
                         shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
                         webelts = shadowroot.find_elements(*locator_click)
                     else:
                         webelts = []
-                        # raise utils_seleniumxp.ErrorUtilsSelenium(f"ShadowDOM host selector {locator_shadowdomhost} not unique.")
                         if hasattr(webdriver, "closepopup_logger"):
                             webdriver.closepopup_logger.info(f"ShadowDOM host not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
@@ -812,8 +803,6 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                                 closedpopup_thisrun = True
                                 if hasattr(webdriver, "closepopup_logger"):
                                     webdriver.closepopup_logger.info(f"found target\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
-                                # if not firstonly:
-                                #     parsedhtml = utils_seleniumxp.locatorutils.parselSelectorExtension(text=webdriver.page_source)
                                 break
                         except utils_seleniumxp.WebDriverExceptions.StaleElementReferenceException:
                             pass   # simple rerun

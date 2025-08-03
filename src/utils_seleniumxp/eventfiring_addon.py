@@ -54,13 +54,10 @@ def _wrap_elements(result, ef_driver):
     # handle the case if another wrapper wraps EventFiringWebElementXXX classes
     if isinstance(result, (EventFiringWebElementExtended, EventFiringSwitchTo, EventFiringAlert)):
         return result
-    # elif isinstance(result, UtilsSeleniumXP._WebElement):
     elif isinstance(result, _WebElement):
         return EventFiringWebElementExtended(result, ef_driver)
-    # elif isinstance(result, UtilsSeleniumXP._SwitchTo):
     elif isinstance(result, _SwitchTo):
         return EventFiringSwitchTo(result, ef_driver)
-    # elif isinstance(result, UtilsSeleniumXP.Alert):
     elif isinstance(result, _Alert):
         return EventFiringAlert(result, ef_driver)
     elif isinstance(result, list):
@@ -98,11 +95,6 @@ def _getattr(dispatcher, name):
     def _wrap(*args, **kwargs):
         try:
             result = attrib(*args, **kwargs)
-            # if hasattr(dispatcher, "_ef_driver"):
-            # if isinstance(result, (EventFiringWebElementExtended, EventFiringSwitchTo, EventFiringAlert)):
-            #     return _wrap_elements(result, dispatcher._ef_driver)
-            # else:
-            #     return _wrap_elements(result, dispatcher)
             return _wrap_elements(result, dispatcher._wrapperobject)
         except Exception as e:
             dispatcher._listener.on_exception(e, dispatcher._driver)
@@ -151,9 +143,7 @@ class EventFiringWebDriverExtended(EventFiringWebDriver):
     EventFiringWebDriverExtended - extended EventFiringWebDriver class
     """
 
-    # def __init__(self, *args, **kwargs):
     def __init__(self, webdriver, eventlistener):
-        # super().__init__(*args, **kwargs)
         super().__init__(webdriver, eventlistener)
         self._switch_to = EventFiringSwitchTo(super().wrapped_driver._switch_to, self)
         self._dispatcherobject = self._driver
