@@ -1,7 +1,8 @@
 GNU GENERAL PUBLIC LICENSE
                       Version 3, 29 June 2007
 
-    Package with extensions for Selenium webdriver Pytohnb bindungs
+    Package with utilities and functional extensions for Selenium webdriver
+    Python language bindings
     Copyright (C) 2024  dornech
 
     This program is free software: you can redistribute it and/or modify

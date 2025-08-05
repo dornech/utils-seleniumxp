@@ -1,6 +1,6 @@
 # Project information
 site_name: SeleniumXP utilities for Python
-site_description: Package with extensions for Selenium webdriver Pytohnb bindungs
+site_description: Package with utilities and functional extensions for Selenium webdriver Python language bindings
 site_author: dornech
 site_url: https://github.com/dornech/utils-seleniumxp
 copyright: 'Copyright &copy; dornech 2024-present'

@@ -11,18 +11,17 @@ build-backend = "hatchling.build"
 name = "utils-seleniumxp"
 description = "Package with utilities and functional extensions for Selenium webdriver Python language bindings"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 # only license identifier from https://spdx.org/licenses/ are allowed
 license = { text = "GPL-3.0-only" }
 # keywords for easier look-up on PyPI
-keywords = ["Selenium", "webdriver", "Chrome", "event-firing webdriver", "parsel", "close popup"]
+keywords = ["Selenium", "webdriver", "Chrome", "FireFox", "factory function", "event-firing webdriver", "parsel", "close popup"]
 authors = [
     { name = "dornech", email = "dornech@gmx.de" },
 ]
 # options under https://pypi.org/classifiers/
 classifiers = [ # ToDo: Modify according to your needs!
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -291,7 +290,7 @@ ignore = [
     "I001",    # enforce reorganisation of imports
     "T201",    # print statements
     "Q000",    # double quotes found but single quotes preferred
-    "RUF100", # Automatically remove unused # noqa directives
+    "RUF100",  # Automatically remove unused # noqa directives
 ]
 unfixable = [
     # "F401",  # Don't touch unused imports
@@ -299,7 +298,7 @@ unfixable = [
 exclude = ["__init__.py", "_version.py"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["{{ cookiecutter.pkg_name }}"]
+known-first-party = ["utils_seleniumxp"]
 
 [tool.ruff.lint.flake8-quotes]
 # inline-quotes = "single"
