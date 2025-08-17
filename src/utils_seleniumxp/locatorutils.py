@@ -24,7 +24,7 @@ module providing Selenium locator tools
 
 
 
-from typing import NamedTuple, Optional, Union
+from typing import NamedTuple, Union
 
 import parsel
 import re
@@ -110,7 +110,7 @@ class parameterizedSeleniumLocator:
 # check locator list if all of specified type (default By.XPATH or By.CSS_SELECTOR)
 def check_locatorlist(
     loclist: list[SeleniumLocator],
-    loctypes: Optional[Union[list[str], set[str]]] = [By.XPATH, By.CSS_SELECTOR]
+    loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
 ):
     """
     check_locator - check locator list if of type in typelist
@@ -126,12 +126,14 @@ def check_locatorlist(
     check = True
     for locator in loclist:
         if locator is not None:
-            check = check and (locator.by in loctypes)  # type: ignore[operator]
+            check = check and (locator.by in loctypes)
     return check
 
-def check_locator(locator: SeleniumLocator, loctypes: Optional[list[str]] = [By.XPATH, By.CSS_SELECTOR]):
+def check_locator(
+    locator: SeleniumLocator,
+    loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
+):
     return check_locatorlist([locator], loctypes)
-
 
 
 # parsel extension to unify calling for the selector types CSS and XPATH

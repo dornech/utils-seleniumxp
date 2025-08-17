@@ -135,10 +135,26 @@ class _WebDriverMixin:
 
     # mixin for closepopup routines
 
-    def closepopup(self, locator_click: utils_seleniumxp.SeleniumLocator, wait_click: float, check_click: bool = False, locator_iframe: utils_seleniumxp.SeleniumLocator = None, wait_iframe: float = 1, locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None) -> bool:
+    def closepopup(
+        self, locator_click:
+        utils_seleniumxp.SeleniumLocator,
+        wait_click: float,
+        check_click: bool = False,
+        locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
+        wait_iframe: float = 1,
+        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+    ) -> bool:
         return closepopup(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
 
-    def closepopup_queueadd(self, locator_click: utils_seleniumxp.SeleniumLocator, wait_click: float, check_click: bool = False, locator_iframe: utils_seleniumxp.SeleniumLocator = None, wait_iframe: float = 1, locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None) -> None:
+    def closepopup_queueadd(
+        self,
+        locator_click: utils_seleniumxp.SeleniumLocator,
+        wait_click: float,
+        check_click: bool = False,
+        locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
+        wait_iframe: float = 1,
+        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+    ) -> None:
         closepopup_queueadd(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
 
     def closepopup_queueprocessing(self, firstonly: bool = True) -> bool:
@@ -217,9 +233,25 @@ class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.Eve
         return handle_alert(self, alerttext, accept)
 
     # mixin for closepopup routines
-    def closepopup(self, locator_click: utils_seleniumxp.SeleniumLocator, wait_click: float, check_click: bool = False, locator_iframe: utils_seleniumxp.SeleniumLocator = None, wait_iframe: float = 1, locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None) -> bool:
+    def closepopup(
+        self,
+        locator_click: utils_seleniumxp.SeleniumLocator,
+        wait_click: float,
+        check_click: bool = False,
+        locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
+        wait_iframe: float = 1,
+        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+    ) -> bool:
         return closepopup_eventfiring(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
-    def closepopup_queueadd(self, locator_click: utils_seleniumxp.SeleniumLocator, wait_click: float, check_click: bool = False, locator_iframe: utils_seleniumxp.SeleniumLocator = None, wait_iframe: float = 1, locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None) -> bool:
+    def closepopup_queueadd(
+        self, locator_click:
+        utils_seleniumxp.SeleniumLocator,
+        wait_click: float,
+        check_click: bool = False,
+        locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
+        wait_iframe: float = 1,
+        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+    ) -> bool:
         return closepopup_queueadd_eventfiring(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
     def closepopup_queueprocessing(self, firstonly: bool = True) -> bool:
         return closepopup_queueprocessing_eventfiring(self, firstonly)
@@ -256,7 +288,7 @@ def is_present(
     use_parsel: bool = True
 ) -> bool:
     """
-    is_present - check if element is present
+    is_present - check if webelement is present
 
     If element is not present, the standard routine is pretty time-consuming compared to parsel
     using C implemented lxml library. The overhead caused by the library is comparably slow.
@@ -620,9 +652,9 @@ def closepopup(
         webdriver: utils_seleniumxp._RemoteWebDriver,
         locator_click: utils_seleniumxp.SeleniumLocator,
         wait_click: float = 0.1, check_click: bool = False,
-        locator_iframe: utils_seleniumxp.SeleniumLocator = None,
+        locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None
+        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
 ) -> bool:
     """
     closepopup - close popups with use of parsel
@@ -648,9 +680,9 @@ def closepopup_queueadd(
         webdriver: utils_seleniumxp._RemoteWebDriver,
         locator_click: utils_seleniumxp.SeleniumLocator,
         wait_click: float = 0.1, check_click: bool = False,
-        locator_iframe: utils_seleniumxp.SeleniumLocator = None,
+        locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None
+        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
 ) -> None:
     """
     closepopup_queueadd - add entry to closepopop processing queue
@@ -855,13 +887,31 @@ if not utils_seleniumxp.mixinactive:
 #   wrapped driver class level -> implementation prevents methods/calls marked as "recursive" on event firing
 #   driver class level to be dispatched down to wrapped class level
 
-def closepopup_eventfiring(webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended, locator_click: utils_seleniumxp.SeleniumLocator, wait_click: float, check_click: bool = False, locator_iframe: utils_seleniumxp.SeleniumLocator = None, wait_iframe: float = 1, locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None) -> bool:
+def closepopup_eventfiring(
+    webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended,
+    locator_click: utils_seleniumxp.SeleniumLocator,
+    wait_click: float,
+    check_click: bool = False,
+    locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
+    wait_iframe: float = 1,
+    locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+) -> bool:
     return webdriver._dispatch("closepopuphandler", ("simpleclose", webdriver._driver), "_closepopup", (locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost), b_recursive=True)
 
-def closepopup_queueadd_eventfiring(webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended, locator_click: utils_seleniumxp.SeleniumLocator, wait_click: float, check_click: bool = False, locator_iframe: utils_seleniumxp.SeleniumLocator = None, wait_iframe: float = 1, locator_shadowdomhost: utils_seleniumxp.SeleniumLocator = None) -> bool:
+def closepopup_queueadd_eventfiring(
+    webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended,
+    locator_click: utils_seleniumxp.SeleniumLocator,
+    wait_click: float, check_click: bool = False,
+    locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
+    wait_iframe: float = 1,
+    locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+) -> bool:
     return webdriver._dispatch(None, (), "_closepopup_queueadd", (locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost), b_recursive=True)
 
-def closepopup_queueprocessing_eventfiring(webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended, firstonly: bool = True) -> bool:
+def closepopup_queueprocessing_eventfiring(
+    webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended,
+    firstonly: bool = True
+) -> bool:
     return webdriver._dispatch("closepopuphandler", ("queueprocessing", webdriver._driver), "_closepopup_queueprocessing", (firstonly,), b_recursive=True)
 
 # direct settattr instead of mixin-object but avoid name conflict
