@@ -274,24 +274,70 @@ setattr(utils_seleniumxp._WebElement, "get_xpath", get_xpath)
 setattr(utils_seleniumxp._WebElement, "get_xpath_recursive", get_xpath_recursive)
 
 # get simple CSS selector
-def get_css_selector(webelement: utils_seleniumxp._WebElement, use_id: bool = True) -> str:
+def get_css_selector_from_xpath(webelement: utils_seleniumxp._WebElement, use_id: bool = False) -> str:
+    """
+    get_css_selector_from_xpath - get CSS selector for webelement by transforming XPATH
+
+    Args:
+        webelement (utils_seleniumxp._WebElement): webelement
+        use_id (bool, optional): flag if ID attribute should be used. Defaults to False.
+
+    Returns:
+        str: CSS selector to webelement
+    """
 
     xpath = webelement.get_xpath(use_id)
     return cssify.cssify(xpath)
 
+def get_css_selector(webelement: utils_seleniumxp._WebElement) -> str:
+    """
+    get_css_selector - get CSS selector for webelement
+
+    Args:
+        webelement (utils_seleniumxp._WebElement): webelement
+
+    Returns:
+        str: CSS selector to webelement
+    """
+
+    css_selector: list[str] = []
+    element = webelement
+
+    while element.tag_name.lower() != 'html':
+
+        tag = element.tag_name.lower()
+        parent = element.find_element(utils_seleniumxp.By.XPATH, "..")
+        siblings = parent.find_elements(utils_seleniumxp.By.XPATH, f"./{tag}")
+
+        if len(siblings) == 1:
+            css_selector.insert(0, tag)
+        else:
+            index = None
+            for i, sibling in enumerate(siblings, start=1):
+                if sibling._id == element._id:
+                    index = i
+                    break
+            css_selector.insert(0, f"{tag}:nth-of-type({index})")
+
+        element = parent
+
+    css_selector.insert(0, "html")
+    return " > ".join(css_selector)
+
 # no mixin-object for WebElement -> direct settattr
+setattr(utils_seleniumxp._WebElement, "get_css_selector_from_xpath", get_css_selector)
 setattr(utils_seleniumxp._WebElement, "get_css_selector", get_css_selector)
 
 
-# webelement - check if child element is present
+# webelement - check if element is present
 
-# check if element is present
+# check if child webelement is present
 # w/o optimization pretty slow, optimization uses XPATH to webelement
 def is_present(
     webelement: utils_seleniumxp._WebElement, by: utils_seleniumxp.By, value: str, use_parsel: bool = True
 ) -> bool:
     """
-    is_present - check if element is present starting (start with webelement provided instead of root)
+    is_present - check if child webelement is present
 
     Args:
         webelement (utils_seleniumxp._WebElement): webelement
