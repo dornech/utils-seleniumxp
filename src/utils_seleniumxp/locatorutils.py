@@ -40,7 +40,7 @@ class SeleniumLocator(NamedTuple):
     """
     SeleniumLocator - locator as namedtuple (dataclass leads to error as unpack operator will not work)
     """
-    by: str
+    by: Union[By, str]
     value: str
 
 
