@@ -74,8 +74,8 @@ local_scheme = "dirty-tag"
 [tool.hatch.build]
 packages = ["src/utils_seleniumxp"]
 
-[tool.hatch.build.hooks.vcs]
-version-file = "src/utils_seleniumxp/_version.py"
+# [tool.hatch.build.hooks.vcs]
+# version-file = "src/utils_seleniumxp/_version.py"
 
 [tool.hatch.build.targets.sdist]
 artifacts = ["_version.py"]
