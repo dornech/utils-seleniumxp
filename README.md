@@ -48,10 +48,17 @@ problems with `hatch run lint:fix` and use `hatch run docs:serve` to build and s
 You can also easily define your own environments and commands. Check out the environment setup of hatch
 in [pyproject.toml](pyproject.toml) for more commands as well as the package, build and tool configuration.
 
+To support versioning and changelog generation please refer to the toolchain selected during package
+generation (see also `pyproject.toml`). If not deselected, the toolchain includes a [pre-commit] hook
+for linting commit messages to ensure commit messages are compliant with the conventional commit format and
+support an automated changelog generation.
+
 ## Credits
 
-This package was created with [The Hatchlor] project template.
+This package was created with [The Hatchlor Enhanced] project template. This template is based on [The Hatchlor]
+but was substantially improved.
 
+[The Hatchlor Enhanced]: https://github.com/dornech/the-hatchlor-enhanced
 [The Hatchlor]: https://github.com/florianwilhelm/the-hatchlor
 [pipx]: https://pypa.github.io/pipx/
 [hatch]: https://hatch.pypa.io/
