@@ -779,7 +779,7 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                         utils_seleniumxp.WebDriverWait(webdriver, wait_iframe).until(utils_seleniumxp.ExpectedConditions.frame_to_be_available_and_switch_to_it(locator_iframe))
                         if (utils_seleniumxp.locatorutils.check_locator(locator_click, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR]) or
                             utils_seleniumxp.locatorutils.check_locator(locator_shadowdomhost, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR])
-                            ):
+                        ):
                             parsedhtml = utils_seleniumxp.locatorutils.parselSelectorExtension(text=webdriver.page_source)
                     elif len(frames) > 1:
                         if hasattr(webdriver, "closepopup_logger"):
@@ -823,7 +823,7 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                     closedpopup_thisrun = False
                     for webelt in webelts:
                         try:
-                            if webelt.is_displayed():
+                            if webelt.is_displayed() and not webelt.is_overlapped():
                                 countwindows = len(webdriver.window_handles)
                                 keepwindows = webdriver.window_handles
                                 webelt.click()
@@ -838,6 +838,8 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                                 break
                         except utils_seleniumxp.WebDriverExceptions.StaleElementReferenceException:
                             pass   # simple rerun
+                        except utils_seleniumxp.WebDriverExceptions.ElementClickInterceptedException:
+                            pass  # simple rerun
                         except:
                             raise
 

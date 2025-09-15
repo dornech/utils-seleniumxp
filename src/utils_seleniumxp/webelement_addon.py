@@ -370,6 +370,43 @@ setattr(utils_seleniumxp._WebElement, "is_present", is_present)
 setattr(utils_seleniumxp._WebElement, "is_element_present", is_present)
 
 
+# webelement - check for overlap, get overlapping element
+# inspired by https://stackoverflow.com/questions/49921128/selenium-cant-click-element-because-other-element-obscures-it/72361846#72361846
+
+# check for overlap
+def is_overlapped(webelement: utils_seleniumxp._WebElement) -> bool:
+    """
+    is_overlapped -  check if element is overlapped
+
+    Args:
+        webelement (utils_seleniumxp._WebElement): webelement
+    """
+
+    check_element = get_overlapping_element(webelement)
+    return not (check_element is None or check_element == webelement)
+
+# no mixin-object for WebElement -> direct settattr
+setattr(utils_seleniumxp._WebElement, "is_overlapped", is_overlapped)
+
+# get overlapping element
+def get_overlapping_element(webelement: utils_seleniumxp._WebElement) -> utils_seleniumxp._WebElement:
+    """
+    get_overlapping_element -  get overlapping element
+
+    Args:
+        webelement (utils_seleniumxp._WebElement): webelement
+    """
+
+    rect = webelement.rect
+    result = webelement.parent.execute_script("return document.elementFromPoint(arguments[0], arguments[1]);", rect['x'] + rect['width'] // 2, rect['y'] + rect['height'] // 2)
+    if result == webelement:
+        result = None
+    return result
+
+# no mixin-object for WebElement -> direct settattr
+setattr(utils_seleniumxp._WebElement, "get_overlapping_element", get_overlapping_element)
+
+
 # webelement - clear & send_keys
 
 # clear element and send keys
