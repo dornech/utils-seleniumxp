@@ -19,12 +19,15 @@ requires-python = ">=3.9"
 # only license identifier from https://spdx.org/licenses/ are allowed
 license = { text = "GPL-3.0-only" }
 # keywords for easier look-up on PyPI
-keywords = ["Selenium", "webdriver", "Chrome", "FireFox", "factory function", "event-firing webdriver", "parsel", "close popup"]
+keywords = [
+    "Selenium", "webdriver", "Chrome", "FireFox",
+    "factory function", "event-firing webdriver", "parsel", "close popup"
+]
 authors = [
     { name = "dornech", email = "dornech@gmx.de" },
 ]
 # options under https://pypi.org/classifiers/
-classifiers = [ # ToDo: Modify according to your needs!
+classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -40,7 +43,7 @@ dependencies = [
     "psutil",
     "requests",
     "selenium",
-    "seleniumrequests",
+    "selenium-requests",
     "stealthenium",
     "utils_mystuff"
 ]
@@ -126,7 +129,7 @@ change_type_order = ["BREAKING CHANGE", "feat", "fix", "refactor", "perf", "docs
 ##################
 
 [tool.docsig]
-check-class = true
+check-class = false
 check-class-constructor = true
 check-dunders = false
 check-nested = false
@@ -291,7 +294,7 @@ exclude_lines = [
 
 # Hatch default environment
 [tool.hatch.envs.default]
-python = "3.9"
+# python = "3.9"
 post-install-commands = ["pre-commit install", "pre-commit install --hook-type commit-msg"]
 dependencies = [
     "pre-commit",
@@ -333,7 +336,7 @@ debug =  "cov --no-cov -s --pdb --pdbcls=IPython.core.debugger:Pdb {args}"
 # Hatch testing environment matrix for various Python versions replacing the functionality of tox
 [[tool.hatch.envs.test.matrix]]
 template = ["test"]
-python = ["39", "310", "311", "312", "313"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 # Hatch default linting environment for "hatch fmt"
 [tool.hatch.envs.hatch-static-analysis]
@@ -354,11 +357,11 @@ dependencies = [
 ]
 [tool.hatch.envs.lint.scripts]
 typing = [
-    "echo \"VERSION: `mypy --version`\"",
+    "mypy --version",
     "mypy --install-types --non-interactive {args}"
 ]
 style = [
-    "echo \"VERSION: `ruff --version`\"",
+    "ruff --version",
     "ruff check {args:.}",
     "ruff format --check {args:.}",
 ]
@@ -367,13 +370,10 @@ fix = [
     "ruff check --fix {args:.}",
     "style",  # feedback on what is not fixable
 ]
-docsig = [
-    "docsig",
-]
 all = [
     "style",
     "typing",
-    "docsig",
+    "docsig src",
 ]
 
 # Hatch environment for building documentation

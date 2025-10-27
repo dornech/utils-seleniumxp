@@ -15,13 +15,15 @@ module providing event firing and listening - additional functionalities compare
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B006, PLR0904, PLR0917, SIM102
+# ruff: noqa: B006, E301, PLR0904, PLR0917, SIM102
 #
 # disable mypy errors
 # - mypy error "Returning Any from function ..."
 # mypy: disable-error-code = "no-any-return"
 
 # fmt: off
+
+# docsig: disable
 
 
 
@@ -33,10 +35,11 @@ module providing event firing and listening - additional functionalities compare
 
 
 
-from typing import Union
+from typing import Any, Optional
 
 import sys
 
+from selenium.webdriver.remote.webdriver import WebDriver as _WebDriver
 from selenium.webdriver.remote.webelement import WebElement as _WebElement
 from selenium.webdriver.remote.switch_to import SwitchTo as _SwitchTo
 from selenium.webdriver.common.alert import Alert as _Alert
@@ -49,7 +52,7 @@ from selenium.webdriver.support.event_firing_webdriver import EventFiringWebElem
 # commonly used functions for extended EventFiringXXX classes
 
 # result wrapper
-def _wrap_elements(result, ef_driver):
+def _wrap_elements(result: Any, ef_driver: "EventFiringWebDriverExtended") -> Any:
 
     # handle the case if another wrapper wraps EventFiringWebElementXXX classes
     if isinstance(result, (EventFiringWebElementExtended, EventFiringSwitchTo, EventFiringAlert)):
@@ -70,10 +73,16 @@ def _wrap_elements(result, ef_driver):
 # attributes of extended / new EventFiringXXX classes to avoid complex if-clause)
 # for non-elementary webdriver methods (like closepopup) special treatment is implemented
 def _dispatch(
-    dispatcher, l_call: Union[str, None], l_args: tuple, d_call: str, d_args: tuple, b_recursive: bool = False
-):
+    dispatcher: Any,
+    l_call: Optional[str],
+    l_args: tuple[Any, ...],
+    d_call: str,
+    d_args: tuple[Any, ...],
+    b_recursive: bool = False
+) -> Any:
 
-    if l_call is not None and l_call != "":
+    # if l_call is not None and l_call != "":
+    if l_call:
         getattr(dispatcher._listener, f"before_{l_call}")(*l_args)
     try:
         if isinstance(dispatcher, EventFiringWebDriverExtended) and b_recursive:
@@ -90,7 +99,7 @@ def _dispatch(
 
 # getattr for FiringEventXXX classes (copy of original getattr method but modified to avoid
 # code duplication and re-use for new classes EventFiringSwitchTo and EventFiringAlert)
-def _getattr(dispatcher, name):
+def _getattr(dispatcher, name: str) -> Any:
 
     def _wrap(*args, **kwargs):
         try:
@@ -111,7 +120,7 @@ def _getattr(dispatcher, name):
 # note that log entry generation for after_event must be included in returned wrapper to keep
 # execution order; however log entry generation for before_event is included as well as for non-method events
 # the log entries do not make too much sense anyway
-def _getattr_dispatch_generic(dispatcher, l_call: Union[str, None], l_args: tuple, d_call: str):
+def _getattr_dispatch_generic(dispatcher: Any, l_call: Optional[str], l_args: tuple, d_call: str):
 
     def _wrap(*args, **kwargs):
 
@@ -143,40 +152,47 @@ class EventFiringWebDriverExtended(EventFiringWebDriver):
     EventFiringWebDriverExtended - extended EventFiringWebDriver class
     """
 
-    def __init__(self, webdriver, eventlistener):
+    def __init__(self, webdriver: _WebDriver, eventlistener: AbstractEventListener):
         super().__init__(webdriver, eventlistener)
         self._switch_to = EventFiringSwitchTo(super().wrapped_driver._switch_to, self)
         self._dispatcherobject = self._driver
         self._wrapperobject = self
 
-    def start_session(self, capabilities: dict, browser_profile=None) -> None:
+    def start_session(self, capabilities: dict[str, Any], browser_profile: Any = None) -> None:
         self._dispatch("start_session", (self._driver,), "start_session", (capabilities, browser_profile))
 
-    def refresh(self):
+    def refresh(self) -> None:
         self._dispatch("refresh", (self._driver,), "refresh", ())
 
-    def add_cookie(self, cookie_dict):
-        self._dispatch("cookiemanager", ("add", cookie_dict, self._driver), "add_cookie", (cookie_dict))
+    def add_cookie(self, cookie_dict: dict[str, Any]) -> None:
+        self._dispatch("cookiemanager", ("add", cookie_dict, self._driver), "add_cookie", (cookie_dict,))
 
-    def delete_all_cookies(self):
+    def delete_all_cookies(self) -> None:
         self._dispatch("cookiemanager", ("delete", "all", self._driver), "delete_all_cookies", ())
 
-    def delete_cookie(self, name):
-        self._dispatch("cookiemanager", ("delete", name, self._driver), "delete_cookies", (name))
+    def delete_cookie(self, name: str) -> None:
+        self._dispatch("cookiemanager", ("delete", name, self._driver), "delete_cookies", (name,))
 
-    def get_cookies(self) -> list[dict]:
+    def get_cookies(self) -> list[dict[str, Any]]:
         return self._dispatch("cookiemanager", ("get", "all", self._driver), "get_cookies", ())
 
-    def get_cookie(self, name) -> dict:
-        return self._dispatch("cookiemanager", ("get", name, self._driver), "get_cookie", (name))
+    def get_cookie(self, name: str) -> dict[str, Any]:
+        return self._dispatch("cookiemanager", ("get", name, self._driver), "get_cookie", (name,))
 
-    def request(self, method: str, url: str, **kwargs):
+    def request(self, method: str, url: str, **kwargs) -> Any:
         return self._dispatch("request", (method, url, self._driver), "request", (method, url, *kwargs))
 
-    def _dispatch(self, l_call, l_args, d_call, d_args, b_recursive: bool = False):
+    def _dispatch(
+        self,
+        l_call: Optional[str],
+        l_args: tuple[Any, ...],
+        d_call: str,
+        d_args: tuple[Any, ...],
+        b_recursive: bool = False
+    ) -> Any:
         return _dispatch(self, l_call, l_args, d_call, d_args, b_recursive)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         # generic call of event listener (if listener object has implemented the interface)
         # watch out for necessity of wrapping the call to match Callable as __getattr__ return type
         # but NOT return type of method d_call
@@ -194,7 +210,6 @@ class EventFiringWebDriverExtended(EventFiringWebDriver):
 # extended EventFiringSwitchTo
 class EventFiringSwitchTo:
 
-    # def __init__(self, switch_to: UtilsSeleniumXP._SwitchTo, ef_driver: EventFiringWebDriverExtended):
     def __init__(self, switch_to: _SwitchTo, ef_driver: EventFiringWebDriverExtended):
         self._switch_to = switch_to
         self._ef_driver = ef_driver
@@ -204,34 +219,40 @@ class EventFiringSwitchTo:
         self._wrapperobject = self._ef_driver
 
     @property
-    def wrapped_element(self):
+    def wrapped_element(self) -> _SwitchTo:
         return self._switch_to
 
-    def active_element(self):
+    def active_element(self) -> Any:
         return self._dispatch(None, (), "active_element", ())
 
-    def alert(self):
+    def alert(self) -> Any:
         return self._dispatch(None, (), "alert", ())
 
-    def default_content(self):
+    def default_content(self) -> None:
         self._dispatch("switch_to", ("default", "", self._driver), "default_content", ())
 
-    def frame(self, frame_reference):
+    def frame(self, frame_reference: Any) -> None:
         self._dispatch("switch_to", ("frame", frame_reference, self._driver), "frame", (frame_reference))
 
-    def new_window(self, type_hint):
-        self._dispatch("switch_to", ("new_window", type_hint, self._driver), "frame", (type_hint))
+    def new_window(self, type_hint: str) -> None:
+        self._dispatch("switch_to", ("new_window", type_hint, self._driver), "frame", (type_hint,))
 
-    def parent_frame(self):
+    def parent_frame(self) -> None:
         self._dispatch("switch_to", ("parent_frame", "", self._driver), "parent_frame", ())
 
-    def window(self, window_name):
-        self._dispatch("switch_to", ("window", window_name, self._driver), "window", (window_name))
+    def window(self, window_name: str):
+        self._dispatch("switch_to", ("window", window_name, self._driver), "window", (window_name,))
 
-    def _dispatch(self, l_call, l_args, d_call, d_args):
+    def _dispatch(
+        self,
+        l_call: Optional[str],
+        l_args: tuple[Any, ...],
+        d_call: str,
+        d_args: tuple[Any, ...]
+    ) -> Any:
         return _dispatch(self, l_call, l_args, d_call, d_args)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return _getattr(self, name)
 
 # done for original EventFiringSwitchTo not possible for own developed class
@@ -243,7 +264,6 @@ class EventFiringSwitchTo:
 # extended EventFiringAlert
 class EventFiringAlert:
 
-    # def __init__(self, alert: UtilsSeleniumXP.Alert, ef_driver: EventFiringWebDriverExtended):
     def __init__(self, alert: _Alert, ef_driver: EventFiringWebDriverExtended):
         self._alert = alert
         self._ef_driver = ef_driver
@@ -253,22 +273,28 @@ class EventFiringAlert:
         self._wrapperobject = self._ef_driver
 
     @property
-    def wrapped_element(self):
+    def wrapped_element(self) -> _Alert:
         return self._alert
 
-    def dismiss(self):
+    def dismiss(self) -> None:
         self._dispatch("alerthandler", ("dismiss", self._driver), "dismiss", ())
 
-    def accept(self):
+    def accept(self) -> None:
         self._dispatch("alerthandler", ("accept", self._driver), "accept", ())
 
-    def send_keys(self, keysToSend):
-        self._dispatch("alerthandler", (f"sendkeys '{keysToSend}'", self._driver), "send_keys", (keysToSend))
+    def send_keys(self, keysToSend: str) -> None:
+        self._dispatch("alerthandler", (f"sendkeys '{keysToSend}'", self._driver), "send_keys", (keysToSend,))
 
-    def _dispatch(self, l_call, l_args, d_call, d_args):
+    def _dispatch(
+        self,
+        l_call: Optional[str],
+        l_args: tuple[Any, ...],
+        d_call: str,
+        d_args: tuple[Any, ...]
+    ) -> Any:
         return _dispatch(self, l_call, l_args, d_call, d_args)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return _getattr(self, name)
 
 # done for original EventFiringAlert but not possible for own developed
@@ -285,13 +311,19 @@ class EventFiringWebElementExtended(EventFiringWebElement):
         self._dispatcherobject = self._webelement
         self._wrapperobject = self._ef_driver
 
-    def submit(self):
+    def submit(self) -> Any:
         self._dispatch("submit", (self._webelement, self._driver), "submit", ())
 
-    def _dispatch(self, l_call, l_args, d_call, d_args):
+    def _dispatch(
+        self,
+        l_call: Optional[str],
+        l_args: tuple,
+        d_call: str,
+        d_args: tuple
+    ) -> Any:
         return _dispatch(self, l_call, l_args, d_call, d_args)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return _getattr(self, name)
 
 # needed for original class EventFiringWebElement but potentially not needed for
@@ -319,23 +351,20 @@ class AbstractEventListenerExtended(AbstractEventListener):
         return self._events_include
 
     @events_include.setter
-    def events_include(self, eventlist: list[str]):
+    def events_include(self, eventlist: list[str]) -> None:
         self._events_include = eventlist
-
     @property
     def events_exclude(self) -> list[str]:
         return self._events_exclude
-
     @events_exclude.setter
-    def events_exclude(self, eventlist: list[str]):
+    def events_exclude(self, eventlist: list[str]) -> None:
         self._events_exclude = eventlist
 
     @property
     def events_generic(self) -> list[str]:
         return self._events_generic
-
     @events_generic.setter
-    def events_generic(self, eventlist: list[str]):
+    def events_generic(self, eventlist: list[str]) -> None:
         self._events_generic = eventlist
 
     # initialization and utilities
@@ -347,12 +376,12 @@ class AbstractEventListenerExtended(AbstractEventListener):
         events_generic_list: list[str] = []
     ):
 
-        self.events_include = events_include_list
-        self.events_exclude = events_exclude_list
-        self.events_generic = events_generic_list
+        self.events_include: list[str] = events_include_list
+        self.events_exclude: list[str] = events_exclude_list
+        self.events_generic: list[str] = events_generic_list
 
     @classmethod
-    def _getmethodname(cls):
+    def _getmethodname(cls) -> str:
         """ utility for event handler (avoid hardcoding of event name in handler method) """
         return sys._getframe(1).f_code.co_name
 
@@ -364,52 +393,52 @@ class AbstractEventListenerExtended(AbstractEventListener):
 
     # extended listener
 
-    def before_cookiemanager(self, mode, cookiekey, driver) -> None:
+    def before_cookiemanager(self, mode: str, cookiekey: str, driver: _WebDriver) -> None:
         pass
 
-    def after_cookiemanager(self, mode, cookiekey, driver) -> None:
+    def after_cookiemanager(self, mode: str, cookiekey: str, driver: _WebDriver) -> None:
         pass
 
-    def before_refresh(self, driver) -> None:
+    def before_refresh(self, driver: _WebDriver) -> None:
         pass
 
-    def after_refresh(self, driver) -> None:
+    def after_refresh(self, driver: _WebDriver) -> None:
         pass
 
-    def before_start_session(self, driver) -> None:
+    def before_start_session(self, driver: _WebDriver) -> None:
         pass
 
-    def after_start_session(self, driver) -> None:
+    def after_start_session(self, driver: _WebDriver) -> None:
         pass
 
-    def before_submit(self, element, driver) -> None:
+    def before_submit(self, element, driver: _WebDriver) -> None:
         pass
 
-    def after_submit(self, element, driver) -> None:
+    def after_submit(self, element, driver: _WebDriver) -> None:
         pass
 
-    def before_switch_to(self, objtyp, value, driver) -> None:
+    def before_switch_to(self, objtyp, value: Any, driver: _WebDriver) -> None:
         pass
 
-    def after_switch_to(self, objtyp, value, driver) -> None:
+    def after_switch_to(self, objtyp, value: Any, driver: _WebDriver) -> None:
         pass
 
-    def before_alerthandler(self, mode, driver) -> None:
+    def before_alerthandler(self, mode: str, driver) -> None:
         pass
 
-    def after_alerthandler(self, mode, driver) -> None:
+    def after_alerthandler(self, mode: str, driver) -> None:
         pass
 
-    def before_closepopuphandler(self, mode, driver) -> None:
+    def before_closepopuphandler(self, mode: str, driver) -> None:
         pass
 
-    def after_closepopuphandler(self, mode, driver) -> None:
+    def after_closepopuphandler(self, mode: str, driver) -> None:
         pass
 
-    def before_request(self, method, url, driver) -> None:
+    def before_request(self, method: str, url: str, driver) -> None:
         pass
 
-    def after_request(self, method, url, driver) -> None:
+    def after_request(self, method: str, url: str, driver) -> None:
         pass
 
     # generic listener

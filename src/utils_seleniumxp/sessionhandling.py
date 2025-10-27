@@ -23,10 +23,10 @@ Currently full support is implemented for Chrome and Firefox only.
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B006, B008, B010, E501, PLC0415, PLR0914, PLR0917, PLR1702, PLR2004, RUF022, S110, S113, SIM102
+# ruff: noqa: B006, B008, B010, E501, PLC0415, PLR0914, PLR0917, PLR1702, PLR2004, RUF022, S101, S110, S113, SIM102
 #
 # disable mypy errors
-# mypy: disable-error-code = "attr-defined, arg-type, call-overload, no-any-return"
+# mypy: disable-error-code = "attr-defined, arg-type, call-overload, no-any-return, unused-ignore"
 
 # fmt: off
 
@@ -111,7 +111,7 @@ def init_webdriver(
     browser: Optional[str] = None,
     inifile: Optional[str] = None,
     inisection: str = "DEFAULT",
-    settings: list[Union[(tuple[str], tuple[str, list[Any]])]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
+    settings: list[Union[tuple[str], tuple[str, list[Any]]]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
     debugport: int = 0,
     implicitlywait: int = 10,
     maxpageload: int = 30,
@@ -145,7 +145,7 @@ def init_webdriver(
         browser (Optional[str], optional): browser, read from INI file if not set. Defaults to None.
         inifile (Optional[str], optional): INI file. Defaults to None.
         inisection (str, optional): INI section to be evaluated. Defaults to "DEFAULT".
-        settings (list[Union[, optional): Browser preference setting functions. Defaults to [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])].
+        settings (list[Union[tuple[str], tuple[str, list[Any]]]], optional): Browser preference setting functions. Defaults to [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])].
         debugport (int, optional): set debugport (currently Chrome only). Defaults to 0.
         implicitlywait (int, optional): implicit wait time. Defaults to 10.
         maxpageload (int, optional): max pageload time. Defaults to 20.
@@ -284,6 +284,7 @@ def init_webdriver(
 
         # set options object - some wrappers define own options class
         browsersettings = utils_seleniumxp.WebDriver.ChromeOptions() if alt_cls_options is None else alt_cls_options()
+        assert isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions)
 
         # options / preferences
         prefsdict: dict = {}
@@ -317,6 +318,7 @@ def init_webdriver(
 
         # set options object - some wrappers define own options class
         browsersettings = utils_seleniumxp.WebDriver.FirefoxOptions() if alt_cls_options is None else alt_cls_options()
+        assert isinstance(browsersettings, utils_seleniumxp._RemoteWebDriver.FireFoxOptions)
 
         # options / preferences
         if len(settings) > 0:
@@ -362,6 +364,8 @@ def init_webdriver(
 
     # install requested extensions - Chrome
     if browser == "chrome" and extensionspath != "":
+
+        assert isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions)
         extensions_installed = evaluate_extensionspath(
             browsersettings.add_extension, extensionspath
         )
@@ -375,22 +379,22 @@ def init_webdriver(
         if alt_cls_webdriverwrapper is not None:
             if (browser.upper() in [mro_cls.__module__.upper() for mro_cls in alt_cls_webdriverwrapper.__mro__]) or \
                 ("selenium.webdriver.chrome.webdriver" in [mro_cls.__module__ for mro_cls in alt_cls_webdriverwrapper.__mro__]):
-                cls_webdriver = alt_cls_webdriverwrapper
+                cls_webdriver = alt_cls_webdriverwrapper  # type: ignore[assignment]
     elif browser == "firefox":
-        cls_webdriver = utils_seleniumxp.WebDriver.Firefox
+        cls_webdriver = utils_seleniumxp.WebDriver.Firefox  # type: ignore[assignment]
         if alt_cls_webdriverwrapper is not None:
             if (browser.upper() in [mro_cls.__module__.upper() for mro_cls in alt_cls_webdriverwrapper.__mro__]) or \
                 ("selenium.webdriver.firefox.webdriver" in [mro_cls.__module__ for mro_cls in alt_cls_webdriverwrapper.__mro__]):
-                cls_webdriver = alt_cls_webdriverwrapper
+                cls_webdriver = alt_cls_webdriverwrapper  # type: ignore[assignment]
     if mixin or utils_seleniumxp.mixinactive:
         webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedin(cls_webdriver)(options=browsersettings)
     else:
-        webdriver = utils_seleniumxp.webdriver_addon.WebDriver3rdPartyMixedin(cls_webdriver)(options=browsersettings)
+        webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedinOnly3rdParty(cls_webdriver)(options=browsersettings)
     if eventlistener is not None:
         if mixin or utils_seleniumxp.mixinactive:
-            webdriver = utils_seleniumxp.webdriver_addon.EventFiringWebDriverExtendedMixedin(webdriver, eventlistener)
+            webdriver = utils_seleniumxp.webdriver_addon.EventFiringWebDriverExtendedMixedin(webdriver, eventlistener)  # type: ignore[assignment]
         else:
-            webdriver = utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended(webdriver, eventlistener)
+            webdriver = utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended(webdriver, eventlistener)  # type: ignore[assignment]
     webdriver.get("about:blank")
 
     # install requested extensions - Firefox
@@ -465,7 +469,7 @@ def initWebDriver(
     browser: Optional[str] = None,
     inifile: Optional[str] = None,
     inisection: str = "DEFAULT",
-    settings: list[Union[(tuple[str], tuple[str, list[Any]])]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
+    settings: list[Union[tuple[str], tuple[str, list[Any]]]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
     debugport: int = 0,
     implicitlywait: int = 10,
     maxpageload: int = 30,
@@ -499,7 +503,7 @@ def initWebDriver(
         browser (Optional[str], optional): browser, read from INI file if not set. Defaults to None.
         inifile (Optional[str], optional): INI file. Defaults to None.
         inisection (str, optional): INI section to be evaluated. Defaults to "DEFAULT".
-        settings (list[Union[, optional): Browser preference setting functions. Defaults to [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])].
+        settings (list[Union[tuple[str], tuple[str, list[Any]]]], optional): Browser preference setting functions. Defaults to [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])].
         debugport (int, optional): set debugport (currently Chrome only). Defaults to 0.
         implicitlywait (int, optional): implicit wait time. Defaults to 10.
         maxpageload (int, optional): max pageload time. Defaults to 20.
@@ -626,14 +630,14 @@ def connect_chrome(
             options=browsersettings
         )
     else:
-        webdriver = utils_seleniumxp.webdriver_addon.WebDriver3rdPartyMixedin(utils_seleniumxp.WebDriver.Chrome)(
+        webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedinOnly3rdParty(utils_seleniumxp.WebDriver.Chrome)(
             options=browsersettings
         )
     if eventlistener is not None:
         if mixin or utils_seleniumxp.mixinactive:
-            webdriver = utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended(webdriver, eventlistener)
+            webdriver = utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended(webdriver, eventlistener)  # type: ignore[assignment]
         else:
-            webdriver = utils_seleniumxp.webdriver_addon.EventFiringWebDriverExtendedMixedin(webdriver, eventlistener)
+            webdriver = utils_seleniumxp.webdriver_addon.EventFiringWebDriverExtendedMixedin(webdriver, eventlistener)  # type: ignore[assignment]
     # webdriver.get("about:blank")
 
     # set logging for closepopup
@@ -889,7 +893,7 @@ def set_log_sessionstart(config: configparser.ConfigParser, inisection: str) -> 
     else:
         return None
 
-def close_log_sessionstart(sessionstart_logger: Optional[logging.Logger]):
+def close_log_sessionstart(sessionstart_logger: Optional[logging.Logger]) -> None:
     """
     close_log_sessionstart - close logger for logging session start
 
@@ -903,9 +907,9 @@ def close_log_sessionstart(sessionstart_logger: Optional[logging.Logger]):
 
 # set up log for closepopup
 
-def set_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver, config: configparser.ConfigParser, inisection: str):
+def set_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver, config: configparser.ConfigParser, inisection: str) -> None:
     """
-    set_log_closepopup - - initialize logger for logging close popups
+    set_log_closepopup - initialize logger for logging close popups
 
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver object
@@ -918,7 +922,7 @@ def set_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver, config: con
         logpath = config.get(inisection, "log_closepopup_path")
         setattr(webdriver, "closepopup_logger", Utils.initLogger(loggername="Log_ClosePopup", filename=logpath))
 
-def close_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver):
+def close_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver) -> None:
     """
     close_log_closepopup - close logger for logging close popups
 
@@ -933,12 +937,13 @@ def close_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver):
 
 
 # clean up driver processes
-def kill_driver_processes(browser: str = "chrome", pid=None):
+def kill_driver_processes(browser: str = "chrome", pid: Optional[int] = None) -> None:
     """
     kill_driver_processes - routine to kill driver process(es) for automated clean-up
 
     Args:
         browser (str, optional): browser. Defaults to "chrome".
+        pid (Optional[int], optional): process ID
     """
 
     if browser not in supported_browsers:
@@ -948,7 +953,7 @@ def kill_driver_processes(browser: str = "chrome", pid=None):
     driverbinary: str = supported_browsers[browser][1]
     with contextlib.suppress(psutil.NoSuchProcess):
         psutil.Process(pid).send_signal(signal.SIGTERM)
-    pids: list = []
+    pids: list[int] = []
     try:
         for proc in psutil.process_iter(["name"]):
             if proc.info["name"] == driverbinary:

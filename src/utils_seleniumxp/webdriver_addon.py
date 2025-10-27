@@ -21,10 +21,10 @@ Webdriver extensions include:
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B010, E301, E305, E501, PLR0904, PLR0914, PLR0917, PLR1702, PLR5501, SIM102
+# ruff: noqa: B010, E301, E305, E501, PLR0904, PLR0914, PLR0917, PLR1702, PLR5501, S101, SIM102
 #
 # disable mypy errors
-# mypy: disable-error-code = "no-any-return"
+# mypy: disable-error-code = "no-any-return, attr-defined, unused-ignore"
 
 # fmt: off
 
@@ -49,11 +49,12 @@ Webdriver extensions include:
 
 
 from typing import Optional, Union
+from collections.abc import Generator
 
 import contextlib
 
 import time
-import fnmatch      # alternative: simplematch
+import fnmatch  # alternative: simplematch
 
 # import queue
 import collections
@@ -86,64 +87,94 @@ class _WebDriverMixin:
 
     # mixin for get_user_agent
     def get_user_agent(self) -> str:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return get_user_agent(self)
 
     # mixin for is_present / is_element_present
 
     def is_present(self, by: utils_seleniumxp.By, value: str, use_parsel: bool = True) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return is_present(self, by, value, use_parsel)
 
     def is_element_present(self, by: utils_seleniumxp.By, value: str, use_parsel: bool = True) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return is_present(self, by, value, use_parsel)
 
     # mixin for find_elements_optimized
-    def find_elements_optimized(self, by: utils_seleniumxp.By, value: str, use_parsel: bool = True) -> list[utils_seleniumxp._WebElement]:
+    def find_elements_optimized(
+        self, by: utils_seleniumxp.By, value: str, use_parsel: bool = True
+    ) -> list[utils_seleniumxp._WebElement]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_elements_optimized(self, by, value, use_parsel)
 
     # mixin for find_shadowroot, find_elements_shadowdom and find_element_shadowdom
 
-    def find_root_shadowdom(self, by: utils_seleniumxp.By, value: str) -> Optional[utils_seleniumxp._WebElement]:
+    def find_root_shadowdom(self, by: utils_seleniumxp.By, value: str) ->  Optional[utils_seleniumxp._ShadowRoot]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_root_shadowdom(self, by, value)
 
-    def find_elements_shadowdom_simple(self, by: utils_seleniumxp.By, value: str, shadowroot: utils_seleniumxp._WebElement) -> Optional[list[utils_seleniumxp._WebElement]]:
+    def find_elements_shadowdom_simple(
+        self, by: utils_seleniumxp.By, value: str, shadowroot: Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]
+    ) -> Optional[list[utils_seleniumxp._WebElement]]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_elements_shadowdom_simple(self, by, value, shadowroot)
 
-    def find_elements_shadowdom(self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[utils_seleniumxp._WebElement] = None) -> Optional[utils_seleniumxp._WebElement]:
+    def find_elements_shadowdom(
+        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+    ) -> Optional[list[utils_seleniumxp._WebElement]]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_elements_shadowdom(self, locator_list, shadowroot)
 
-    def find_element_shadowdom_simple(self, by: utils_seleniumxp.By, value: str, shadowroot: utils_seleniumxp._WebElement) -> Optional[utils_seleniumxp._WebElement]:
+    def find_element_shadowdom_simple(
+        self, by: utils_seleniumxp.By, value: str, shadowroot: Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]
+    ) -> Optional[utils_seleniumxp._WebElement]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_element_shadowdom_simple(self, by, value, shadowroot)
 
-    def find_element_shadowdom(self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[utils_seleniumxp._WebElement] = None) -> Optional[utils_seleniumxp._WebElement]:
+    def find_element_shadowdom(
+        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+    ) -> Optional[utils_seleniumxp._WebElement]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_element_shadowdom(self, locator_list, shadowroot)
 
     # mixin for is_present_shadowdom
 
-    def is_present_shadowdom(self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[utils_seleniumxp._WebElement] = None) -> bool:
+    def is_present_shadowdom(
+        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+    ) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return is_present_shadowdom(self, locator_list, shadowroot)
 
-    def is_element_present_shadowdom(self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[utils_seleniumxp._WebElement] = None) -> bool:
+    def is_element_present_shadowdom(
+        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+    ) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return is_element_present_shadowdom(self, locator_list, shadowroot)
 
     # mixin for hover over element
-    def hover_over_element(self, by: utils_seleniumxp.By, value: str, by_host: Optional[utils_seleniumxp.By], value_host: Optional[str]) -> None:
+    def hover_over_element(
+        self, by: utils_seleniumxp.By, value: str, by_host: Optional[utils_seleniumxp.By], value_host: Optional[str]
+    ) -> None:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         hover_over_element(self, by, value, by_host, value_host)
 
     # mixin for handle_alert
     def handle_alert(self, alerttext: str, accept: bool = False) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return handle_alert(self, alerttext, accept)
 
     # mixin for closepopup routines
 
     def closepopup(
-        self, locator_click:
-        utils_seleniumxp.SeleniumLocator,
+        self,
+        locator_click: utils_seleniumxp.SeleniumLocator,
         wait_click: float,
         check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
         locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
     ) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return closepopup(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
 
     def closepopup_queueadd(
@@ -155,34 +186,40 @@ class _WebDriverMixin:
         wait_iframe: float = 1,
         locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
     ) -> None:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         closepopup_queueadd(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
 
     def closepopup_queueprocessing(self, firstonly: bool = True) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return closepopup_queueprocessing(self, firstonly)
 
     # mixin for closewindows
-    def closewindows(self, keepwindows: list):
+    def closewindows(self, keepwindows: list) -> None:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         closewindows(self, keepwindows)
 
     # mixin for wait4AJAX and wait4HTMLstable
 
-    def wait4AJAX(self, timeout: int = 15, minwait: float = 0.0) -> bool:
-        return wait4AJAX(self, timeout, minwait)
+    def wait4AJAX(self, timeout: int = 15, min_wait: float = 0.0) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        return wait4AJAX(self, timeout, min_wait)
 
-    def wait4HTMLstable(self, wait: float = 0.1, maxwait: float = 0.5) -> bool:
-        return wait4HTMLstable(self, wait, maxwait)
+    def wait4HTMLstable(self, wait: float = 0.1, max_wait: float = 0.5) -> bool:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        return wait4HTMLstable(self, wait, max_wait)
 
     # extended wait for page load - source from ObeytheTestingGoat
-    def wait_for_page_load(self, timeout=10):
+    def wait_for_page_load(self, timeout=10) -> contextlib.AbstractContextManager:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return wait_for_page_load(self, timeout)
 
 
 # mixin overlay for 3rd party extensions always mixed in
-def WebDriver3rdPartyMixedin(
+def WebDriverMixedinOnly3rdParty(
     cls_webdriver: type[utils_seleniumxp._RemoteWebDriver]
 ) -> type[utils_seleniumxp._RemoteWebDriver]:
     """
-    WebDriver3rdPartyMixedin - factory function for custom class with fixed 3rd party mixins
+    WebDriverMixedinOnly3rdParty - factory function for custom class with fixed 3rd party mixins
 
     The factory function mechanism is required to use alternative base classes like
     undetected_chromedriver.
@@ -194,17 +231,18 @@ def WebDriver3rdPartyMixedin(
         type[utils_seleniumxp._RemoteWebDriver]: custom webdriver class with mixin
     """
 
-    class WebDriverClassCustom(_RequestsSessionMixin, cls_webdriver):
-        pass
-
-    return WebDriverClassCustom
+    # class WebDriverClassCustom(_RequestsSessionMixin, cls_webdriver):
+    #     pass
+    #
+    # return WebDriverClassCustom
+    return type("WebDriverMixedinOnly3rdParty", (cls_webdriver, _RequestsSessionMixin), {})
 
 # own mixin overlay
 def WebDriverMixedin(
     cls_webdriver: type[utils_seleniumxp._RemoteWebDriver]
 ) -> type[utils_seleniumxp._RemoteWebDriver]:
     """
-    WebDriver3rdPartyMixedin - factory function for custom class with fixed 3rd party mixins and own mixin
+    WebDriverMixedin - factory function for custom class with fixed 3rd party mixins and own mixin
 
     The factory function mechanism is required to use alternative base classes like
     undetected_chromedriver.
@@ -216,23 +254,20 @@ def WebDriverMixedin(
         type[utils_seleniumxp._RemoteWebDriver]: custom webdriver class with mixin
     """
 
-    class WebDriverClassCustom(_WebDriverMixin, _RequestsSessionMixin, cls_webdriver):
-        pass
-
-    return WebDriverClassCustom
-
+    # class WebDriverClassCustom(_WebDriverMixin, _RequestsSessionMixin, cls_webdriver):
+    #     pass
+    #
+    # return WebDriverClassCustom
+    return type("WebDriverMixedin", (cls_webdriver, _RequestsSessionMixin, _WebDriverMixin), {})
 
 # mixin class for eventfiring webdriver
-class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended):
+class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended):  # docsig: disable
     """
     EventFiringWebDriverExtendedMixedin - mixin class for eventfiring webdriver
     """
 
-    # mixin for handle_alert
-    def handle_alert(self, alerttext: str, accept: bool = False) -> bool:
-        return handle_alert(self, alerttext, accept)
-
     # mixin for closepopup routines
+
     def closepopup(
         self,
         locator_click: utils_seleniumxp.SeleniumLocator,
@@ -243,6 +278,7 @@ class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.Eve
         locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
     ) -> bool:
         return closepopup_eventfiring(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
+
     def closepopup_queueadd(
         self, locator_click:
         utils_seleniumxp.SeleniumLocator,
@@ -253,6 +289,7 @@ class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.Eve
         locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
     ) -> bool:
         return closepopup_queueadd_eventfiring(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
+
     def closepopup_queueprocessing(self, firstonly: bool = True) -> bool:
         return closepopup_queueprocessing_eventfiring(self, firstonly)
 
@@ -324,6 +361,9 @@ def is_element_present(
     value: str,
     use_parsel: bool = True
 ) -> bool:
+    """
+    is_element_present - check if webelement is present (alternative caller vor _is_present)
+    """
     return is_present(webdriver, by, value, use_parsel)
 
 # direct settattr instead of mixin-object but avoid name conflict
@@ -343,7 +383,7 @@ def find_elements_optimized(
     use_parsel: bool = True
 ) -> list[utils_seleniumxp._WebElement]:
     """
-    find_elements_optimized - optimized find_elements using parsel.
+    find_elements_optimized - optimized find_elements using parsel
 
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
@@ -457,11 +497,15 @@ def find_elements_shadowdom(
         queryselector = queryselector + ".querySelectorAll('" + prepare_selector(locator_list[-1]) + "')"
         if shadowroot is not None:
             if shadowroot.__class__.__name__ != "ShadowRoot":
-                # overcome issue that ShadwoDOM host but not root is provided, try to treat shadowroot as host to derive correct root
-                shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowroot)
+                # overcome issue that ShadwoDOM host but not root is provided
+                # try to treat shadowroot as host to derive correct root
+                try:
+                    shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowroot)
+                except Exception:
+                    return None
             # overcome issue with id attribute, discovered missing in JSON return when accessing shadow root in May 2025
             if not hasattr(shadowroot, "id"):
-                shadowroot.id = shadowroot._id
+                shadowroot.id = shadowroot._id  # type: ignore[misc]
             try:
                 return webdriver.execute_script(f"return arguments[0]{queryselector}", shadowroot)
             except Exception:
@@ -554,6 +598,9 @@ def is_element_present_shadowdom(
     locator_list: list[utils_seleniumxp.SeleniumLocator],
     shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
 ) -> bool:
+    """
+    is_element_present_shadowdom - check if element is present in shadowDOM (alternative caller for is_present_shadowdom)
+    """
     return is_present_shadowdom(webdriver, locator_list, shadowroot)
 
 # direct settattr instead of mixin-object but avoid name conflict
@@ -608,7 +655,7 @@ if not utils_seleniumxp.mixinactive:
 # alert handler including check of alert text
 def handle_alert(webdriver: utils_seleniumxp._RemoteWebDriver, alerttext: str, accept: bool = False) -> bool:
     """
-    handle_alert
+    handle_alert - handle alert
 
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
@@ -619,7 +666,7 @@ def handle_alert(webdriver: utils_seleniumxp._RemoteWebDriver, alerttext: str, a
         bool: flag if alert was processed successfully or not
     """
 
-    if utils_seleniumxp.ExpectedConditions.alert_is_present():
+    if utils_seleniumxp.ExpectedConditions.alert_is_present():  # type: ignore[truthy-function]
         try:
             alert = webdriver._switch_to.alert
             alertmatch = (not alerttext or fnmatch.fnmatch(alert.text, "*" + alerttext + "*"))
@@ -823,7 +870,7 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                     closedpopup_thisrun = False
                     for webelt in webelts:
                         try:
-                            if webelt.is_displayed() and not webelt.is_overlapped():
+                            if webelt.is_displayed() and not webelt.is_overlapped():  # type: ignore[union-attr]
                                 countwindows = len(webdriver.window_handles)
                                 keepwindows = webdriver.window_handles
                                 webelt.click()
@@ -898,6 +945,9 @@ def closepopup_eventfiring(
     wait_iframe: float = 1,
     locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
 ) -> bool:
+    """
+    closepopup_eventfiring - closepopup for eventfiring webdriver, required to avoid endless recurion loop)
+    """
     return webdriver._dispatch("closepopuphandler", ("simpleclose", webdriver._driver), "_closepopup", (locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost), b_recursive=True)
 
 def closepopup_queueadd_eventfiring(
@@ -908,12 +958,18 @@ def closepopup_queueadd_eventfiring(
     wait_iframe: float = 1,
     locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
 ) -> bool:
+    """
+    closepopup_queueadd_eventfiring - closepopup_queueadd for eventfiring webdriver, required to avoid endless recurion loop)
+    """
     return webdriver._dispatch(None, (), "_closepopup_queueadd", (locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost), b_recursive=True)
 
 def closepopup_queueprocessing_eventfiring(
     webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended,
     firstonly: bool = True
 ) -> bool:
+    """
+    closepopup_queueprocessing_eventfiring - closepopup_queueprocessing for eventfiring webdriver, required to avoid endless recurion loop)
+    """
     return webdriver._dispatch("closepopuphandler", ("queueprocessing", webdriver._driver), "_closepopup_queueprocessing", (firstonly,), b_recursive=True)
 
 # direct settattr instead of mixin-object but avoid name conflict
@@ -931,7 +987,7 @@ setattr(utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended, "_close
 
 # close new windows opened by automatic downloads, ...
 # note: transfer value for parameter keepwindows as list even if a single handle !!!
-def closewindows(webdriver: utils_seleniumxp._RemoteWebDriver, keepwindows: list):
+def closewindows(webdriver: utils_seleniumxp._RemoteWebDriver, keepwindows: list) -> None:
     """
     closewindows - close windows except those in 'keeplist'
 
@@ -1027,7 +1083,7 @@ if not utils_seleniumxp.mixinactive:
 
 # extended wait for page load - source from ObeyTheTestingGoat
 @contextlib.contextmanager
-def wait_for_page_load(webdriver: utils_seleniumxp._RemoteWebDriver, timeout=10):
+def wait_for_page_load(webdriver: utils_seleniumxp._RemoteWebDriver, timeout=10) -> Generator:
     """
     wait_for_page_load - wait routine with contextmanager from ObeyTheTestingGoat
 
@@ -1041,8 +1097,11 @@ def wait_for_page_load(webdriver: utils_seleniumxp._RemoteWebDriver, timeout=10)
     do the next thing that was failing before using this
 
     Args:
-        webdriver (utils_seleniumxp._RemoteWebDriver): webdriiver
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         timeout (int, optional): timeout. Defaults to 10.
+
+    Return:
+        (Generator): contextmanager generator
     """
     old_page = webdriver.find_element(utils_seleniumxp.By.TAG_NAME, 'html')
     yield

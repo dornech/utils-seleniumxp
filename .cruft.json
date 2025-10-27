@@ -11,6 +11,7 @@
       "project_short_description": "Package with utilities and functional extensions for Selenium webdriver Python language bindings",
       "open_source_license": "GPL-3.0-only",
       "target_python_version": "3.9",
+      "target_os_platform": "ubuntu-latest, macos-latest, windows-latest",
       "github_username": "dornech",
       "project_repo": "https://github.com/dornech/utils-seleniumxp",
       "pypi_username": "dornech",

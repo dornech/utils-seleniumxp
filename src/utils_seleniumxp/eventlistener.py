@@ -21,6 +21,8 @@ the Selenium project including not covered standard functions
 
 # fmt: off
 
+# docsig: disable
+
 
 
 # TODO Dev:

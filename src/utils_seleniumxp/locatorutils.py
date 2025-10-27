@@ -63,7 +63,7 @@ def SeleniumLocatorCSS(value: str):
 
 # parameterized SeleniumLocator (inspired by https://pypi.org/project/selenium-actions)
 # store base locator as f-string
-class parameterizedSeleniumLocator:
+class parameterizedSeleniumLocator:  # docsig: disable
     """
     parameterizedSeleniumLocator - parameterized SeleniumLocator class
     """
@@ -111,16 +111,16 @@ class parameterizedSeleniumLocator:
 def check_locatorlist(
     loclist: list[SeleniumLocator],
     loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
-):
+) -> bool:
     """
-    check_locator - check locator list if of type in typelist
+    check_locatorlist - check locator list if of type in typelist
 
     Args:
-        loclist(List): list of SeleniumLocator objects (as unnamed parameters)
-        loctypes (Optional[List[str]], optional): list of locator types. Defaults to [By.XPATH, By.CSS_SELECTOR].
+        loclist(list[SeleniumLocator]): list of SeleniumLocator objects
+        loctypes (Union[list[str], set[str], optional): list of locator types. Defaults to [By.XPATH, By.CSS_SELECTOR].
 
     Returns:
-        _type_: _description_
+        bool: check result
     """
 
     check = True
@@ -129,17 +129,28 @@ def check_locatorlist(
             check = check and (locator.by in loctypes)
     return check
 
+# check single locator if of specified type (default By.XPATH or By.CSS_SELECTOR)
 def check_locator(
     locator: SeleniumLocator,
     loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
-):
+) -> bool:
+    """
+    check_locator - check locator if of type in typelist
+
+    Args:
+        locator (SeleniumLocator): SeleniumLocator object
+        loctypes (Union[list[str], set[str], optional): list of locator types. Defaults to [By.XPATH, By.CSS_SELECTOR].
+
+    Returns:
+        bool: check result
+    """
     return check_locatorlist([locator], loctypes)
 
 
-# parsel extension to unify calling for the selector types CSS and XPATH
-class parselSelectorExtension(parsel.Selector):
+# parsel selector wrapping extension to unify calling for the selector types CSS and XPATH
+class parselSelectorExtension(parsel.Selector):  # docsig: disable
     """
-    parselSelectorExtension - parsel extension to unify calling for the selector types CSS and XPATH
+    parselSelectorExtension - parsel selector wrapping extension to unify calling for the selector types CSS and XPATH
     """
 
     def css_or_xpath(self, locator: SeleniumLocator):

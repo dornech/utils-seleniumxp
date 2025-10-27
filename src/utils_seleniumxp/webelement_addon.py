@@ -24,7 +24,7 @@ Webelement extensions include:
 # ruff: noqa: B010, E305, E501
 #
 # disable mypy errors
-# mypy: disable-error-code = "no-any-return"
+# mypy: disable-error-code = "no-any-return, attr-defined"
 
 
 # fmt: off
@@ -75,6 +75,9 @@ def asselect(webelement: utils_seleniumxp._WebElement) -> utils_seleniumxp.Selec
         raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
 def as_select(webelement: utils_seleniumxp._WebElement) -> utils_seleniumxp.Select:
+    """
+    as_select - provide direct access to select object to a SELECT-tag (alternative caller to asselect)
+    """
     return asselect(webelement)
 
 # no mixin-object for WebElement -> direct settattr
@@ -363,6 +366,9 @@ def is_present(
             return True
 
 def is_element_present(webelement: utils_seleniumxp._WebElement, by: utils_seleniumxp.By, value: str, use_parsel: bool = True) -> bool:
+    """
+    is_element_present - check if child webelement is present (alternative caller to is_present)
+    """
     return is_present(webelement, by, value, use_parsel)
 
 # no mixin-object for WebElement -> direct settattr
@@ -380,6 +386,9 @@ def is_overlapped(webelement: utils_seleniumxp._WebElement) -> bool:
 
     Args:
         webelement (utils_seleniumxp._WebElement): webelement
+
+    Return:
+        bool: element is overlapped
     """
 
     check_element = get_overlapping_element(webelement)
@@ -391,10 +400,13 @@ setattr(utils_seleniumxp._WebElement, "is_overlapped", is_overlapped)
 # get overlapping element
 def get_overlapping_element(webelement: utils_seleniumxp._WebElement) -> utils_seleniumxp._WebElement:
     """
-    get_overlapping_element -  get overlapping element
+    get_overlapping_element - get overlapping element
 
     Args:
         webelement (utils_seleniumxp._WebElement): webelement
+
+    Return:
+        utils_seleniumxp._WebElement: overlapping webelement
     """
 
     rect = webelement.rect
