@@ -58,18 +58,7 @@ Beside the factory function to create the webdriver there is no change in the AP
 
 
 
-# version determination
-
-# original Hatchlor version
-# from importlib.metadata import PackageNotFoundError, version
-# try:
-#     __version__ = version('{{ cookiecutter.project_slug }}')
-# except PackageNotFoundError:  # pragma: no cover
-#     __version__ = 'unknown'
-# finally:
-#     del version, PackageNotFoundError
-
-# latest import requirement for hatch-vcs-footgun-example
+# version determination - latest import requirement for hatch-vcs-footgun-example
 from utils_seleniumxp.version import __version__
 
 
@@ -102,7 +91,7 @@ import selenium.webdriver.support.expected_conditions as ExpectedConditions
 
 
 
-# exception class
+# exception class - must be defined here to avoid errors
 class ErrorUtilsSelenium(BaseException):
     pass
 
@@ -112,12 +101,6 @@ class ErrorUtilsSelenium(BaseException):
 # switch mixin method of additional functionality - MixIn class vs. direct setattr or callables
 mixinactive = False
 
-import sys
-import os.path
-
-# switch os.path -> pathlib
-sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)))
-# sys.path.insert(1, str(pathlib.Path(__file__).resolve().parent))
 
 # import utils_seleniumxp.sessionhandling
 from utils_seleniumxp.sessionhandling import initWebDriver, init_webdriver
@@ -128,7 +111,7 @@ from utils_seleniumxp.locatorutils import SeleniumLocator as SeleniumLocator
 from utils_seleniumxp.locatorutils import SeleniumLocatorXPATH as SeleniumLocatorXPATH
 from utils_seleniumxp.locatorutils import SeleniumLocatorCSS as SeleniumLocatorCSS
 from utils_seleniumxp.locatorutils import parameterizedSeleniumLocator as parameterizedSeleniumLocator
-from utils_seleniumxp.locatorutils import  parselSelectorExtension as  parselSelectorExtension
+from utils_seleniumxp.locatorutils import  parselSelectorExtension as parselSelectorExtension
 import utils_seleniumxp.webdriver_addon as WebdriverAddOn
 import utils_seleniumxp.webelement_addon as WebelementAddOn
 import utils_seleniumxp.eventfiring_addon as EventFiringAddon
