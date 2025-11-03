@@ -48,7 +48,7 @@ Webdriver extensions include:
 
 
 
-from typing import Optional, Union
+from typing import cast, Optional, TypeVar, Union
 from collections.abc import Generator
 
 import contextlib
@@ -214,10 +214,11 @@ class _WebDriverMixin:
         return wait_for_page_load(self, timeout)
 
 
+# TypeVar for custom classes to help MyPy
+T = TypeVar("T", bound="utils_seleniumxp._RemoteWebDriver")
+
 # mixin overlay for 3rd party extensions always mixed in
-def WebDriverMixedinOnly3rdParty(
-    cls_webdriver: type[utils_seleniumxp._RemoteWebDriver]
-) -> type[utils_seleniumxp._RemoteWebDriver]:
+def WebDriverMixedinOnly3rdParty(cls_webdriver: type[T]) -> type[T]:
     """
     WebDriverMixedinOnly3rdParty - factory function for custom class with fixed 3rd party mixins
 
@@ -231,16 +232,13 @@ def WebDriverMixedinOnly3rdParty(
         type[utils_seleniumxp._RemoteWebDriver]: custom webdriver class with mixin
     """
 
-    # class WebDriverClassCustom(_RequestsSessionMixin, cls_webdriver):
-    #     pass
-    #
-    # return WebDriverClassCustom
-    return type("WebDriverMixedinOnly3rdParty", (cls_webdriver, _RequestsSessionMixin), {})
+    class WebDriverClassCustom(_RequestsSessionMixin, cls_webdriver):  # type: ignore[valid-type, misc]
+        pass
+
+    return cast(type[T], WebDriverClassCustom)
 
 # own mixin overlay
-def WebDriverMixedin(
-    cls_webdriver: type[utils_seleniumxp._RemoteWebDriver]
-) -> type[utils_seleniumxp._RemoteWebDriver]:
+def WebDriverMixedin(cls_webdriver: type[T]) -> type[T]:
     """
     WebDriverMixedin - factory function for custom class with fixed 3rd party mixins and own mixin
 
@@ -254,11 +252,10 @@ def WebDriverMixedin(
         type[utils_seleniumxp._RemoteWebDriver]: custom webdriver class with mixin
     """
 
-    # class WebDriverClassCustom(_WebDriverMixin, _RequestsSessionMixin, cls_webdriver):
-    #     pass
-    #
-    # return WebDriverClassCustom
-    return type("WebDriverMixedin", (cls_webdriver, _RequestsSessionMixin, _WebDriverMixin), {})
+    class WebDriverClassCustom(_WebDriverMixin, _RequestsSessionMixin, cls_webdriver):  # type: ignore[valid-type, misc]
+        pass
+
+    return cast(type[T], WebDriverClassCustom)
 
 # mixin class for eventfiring webdriver
 class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended):  # docsig: disable
@@ -435,7 +432,12 @@ def find_root_shadowdom(
     """
 
     shadowhost = webdriver.find_element(by, value)
-    shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
+    try:
+        # shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
+        shadowroot = shadowhost.shadow_root
+    except Exception:
+        shadowroot = None
+
     return shadowroot
 
 # find elements in shadow DOM old/simple version
@@ -843,17 +845,18 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                             shadowhosts = parsedhtml.css_or_xpath(locator_shadowdomhost).getall()
                     else:
                         shadowhosts = webdriver.find_elements(*locator_shadowdomhost)
+                    webelts = []
                     if len(shadowhosts) == 0:
-                        webelts = []
                         if hasattr(webdriver, "closepopup_logger"):
                             webdriver.closepopup_logger.info(f"ShadowDOM host not found\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
                     elif len(shadowhosts) == 1:
-                        shadowhost = webdriver.find_element(*locator_shadowdomhost)
-                        shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
-                        webelts = shadowroot.find_elements(*locator_click)
+                        # shadowhost = webdriver.find_element(*locator_shadowdomhost)
+                        # shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
+                        shadowroot = webdriver.find_root_shadowdom(*locator_shadowdomhost)
+                        if shadowroot is not None:
+                            webelts = shadowroot.find_elements(*locator_click)
                     else:
-                        webelts = []
                         if hasattr(webdriver, "closepopup_logger"):
                             webdriver.closepopup_logger.info(f"ShadowDOM host not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
