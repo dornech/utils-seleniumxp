@@ -33,7 +33,7 @@ Currently full support is implemented for Chrome and Firefox only.
 
 
 # TODO Dev:
-# - decorator to check brwoser type for various functions to simplify code ?
+# - decorator to check browser type for various functions to simplify code ?
 # - use user profiles ?
 # - additional parameters in INI file Selenium.ini
 #   - implicitlywait
@@ -74,6 +74,7 @@ import atexit
 import contextlib
 import psutil
 import signal
+import zipfile
 
 import requests
 
@@ -91,7 +92,8 @@ __all__ = [
     'directdownload',
     'disablenotifications',
     'connectChrome', 'connect_chrome',
-    'checkDebugport', 'check_debugport'
+    'checkDebugport', 'check_debugport',
+    'getChromeUserDataDir', 'get_Chrome_userdata_dir'
 ]
 
 
@@ -179,7 +181,7 @@ def init_webdriver(
             err_msg = f"Browser preference set {prefsfunction[0]} not defined."
             raise utils_seleniumxp.ErrorUtilsSelenium(err_msg) from exc_prefscfuntion_eval
 
-    def evaluate_extensionspath(evalfunc: Callable[[str], None], extensionspath: str) -> int:
+    def evaluate_extensionspath(evalfunc: Callable[[str], None], extensionspath: str, unpack: bool = False) -> int:
 
         extensions_installed = 0
         if "extensions" in config[inisection]:
@@ -191,14 +193,33 @@ def init_webdriver(
                     # get-function used to enable fallback value
                     extensionfile = config[browser].get("extension_" + extensionID, fallback="")  # type: ignore[index]
                     if extensionfile != "":
-                        extensionfile = os.path.join(extensionspath, extensionfile)
-                        # extensionfile = pathlib.Path(extensionspath).joinpath(extensionfile)
-                        # if extensionfile.is_file():
-                        if os.path.isfile(extensionfile):
-                            evalfunc(extensionfile)
+                        extensionfile_with_path = os.path.join(extensionspath, extensionfile)
+                        # extensionfile_with_path = pathlib.Path(extensionspath).joinpath(extensionfile)
+                        if os.path.isfile(extensionfile_with_path):
+                            # if extensionfile_with_path.is_file():
+                            if not unpack:
+                                try:
+                                    evalfunc(extensionfile_with_path)
+                                except utils_seleniumxp.WebDriverExceptions.WebDriverException:
+                                    installed = False
+                                else:
+                                    installed = True
+                            else:
+                                extensionfile_pathunpacked = os.path.join(getChromeUserDataDir(webdriver), "extensionunpacked", extensionfile)
+                                with zipfile.ZipFile(extensionfile_with_path, 'r') as archivefile_ref:
+                                    archivefile_ref.extractall(extensionfile_pathunpacked)
+                                try:
+                                    evalfunc(extensionfile_pathunpacked)
+                                except utils_seleniumxp.WebDriverExceptions.WebDriverException:
+                                    installed = False
+                                else:
+                                    installed = True
                             if sessionstartlog is not None:
-                                sessionstartlog.info(f"- '{extensionfile}' for '{extensionID}' found.")
-                            extensions_installed += + 1
+                                if not installed:
+                                    sessionstartlog.info(f"- '{extensionfile}' for '{extensionID}' could not be installed.")
+                                else:
+                                    sessionstartlog.info(f"- '{extensionfile}' for '{extensionID}' installed.")
+                                    extensions_installed += + 1
                         elif sessionstartlog is not None:
                             sessionstartlog.info(f"- File '{extensionfile}' for '{extensionID}' not found.")
                     elif sessionstartlog is not None:
@@ -309,6 +330,12 @@ def init_webdriver(
             browsersettings.add_experimental_option("excludeSwitches", ["enable-automation"])
             browsersettings.add_experimental_option("useAutomationExtension", False)
             browsersettings.add_argument("--disable-blink-features=AutomationControlled")
+        # settings for extensions (partially redundant to BiDi activation)
+        browsersettings.add_argument("--remote-debugging-pipe")
+        browsersettings.add_argument("--enable-unsafe-extension-debugging")
+
+        # settings for #BiDi
+        browsersettings.enable_bidi = True
 
         # remote debugging (currently only Chrome)
         if debugport != 0:
@@ -335,12 +362,16 @@ def init_webdriver(
         # does not work anymore with Selenium 4.x
         # browsersettings.set_preference("xpinstall.signatures.required", False)   # for unsigned extensions
 
-        # potentially switch to options.profile to be amended (Selenium 4)
-
         # settings for Firefox
+        pass
         # settings in addition to stealth extension from stackoverflow (currently Chrome only)
         if stealthmode:
             pass
+        # settings for extensions (partially redundant to BiDi activation)
+        pass
+
+        # settings for #BiDi
+        browsersettings.enable_bidi = True
 
         # remote debugging (currently Chrome only)
         if debugport != 0:
@@ -353,25 +384,27 @@ def init_webdriver(
     # install requested extensions
     # Selenium 3.x: not working properly with FireFox but no error message
     # Selenium 4.x: sub-routine evaluate as Chrome includes add-on in options but firefox requires webdriver start first
-    extensionspath = check_configpath(config_without_default, inisection, "extensionspath")
-    if extensionspath == "":
-        extensionspath = check_configpath(config, browser, "extensionspath")
-    if extensionspath == "":
-        extensionspath = check_usrpath(config, browser, "usrpath_suffix_ext")
-    if extensionspath == "":
-        err_msg = f"Extensions for Browser '{browser}' could not be found in path defined in config file."
-        raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+    # Chrome > 138: add_extensions deprecated
+    # extensionspath = check_configpath(config_without_default, inisection, "extensionspath")
+    # if extensionspath == "":
+    #     extensionspath = check_configpath(config, browser, "extensionspath")
+    # if extensionspath == "":
+    #     extensionspath = check_usrpath(config, browser, "usrpath_suffix_ext")
+    # if extensionspath == "":
+    #     err_msg = f"Extensions for Browser '{browser}' could not be found in path defined in config file."
+    #     raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
-    # install requested extensions - Chrome
-    if browser == "chrome" and extensionspath != "":
-
-        assert isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions)
-        extensions_installed = evaluate_extensionspath(
-            browsersettings.add_extension, extensionspath
-        )
-        # fix according to https://github.com/SeleniumHQ/selenium/issues/15788
-        if extensions_installed > 0:
-            browsersettings.add_argument("--disable-features=DisableLoadExtensionCommandLineSwitch")
+    # install requested extensions - Chrome (until Chrome 136.xxx.xxx )
+    # Chrome > 136: --load_extension and subsequently ChromeOptions.add_Extensions deprecated, see https://github.com/SeleniumHQ/selenium/issues/15788
+    # if browser == "chrome" and extensionspath != "":
+    #
+    #     assert isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions)
+    #     extensions_installed = evaluate_extensionspath(
+    #         browsersettings.add_extension, extensionspath
+    #     )
+    #     # fix according to https://github.com/SeleniumHQ/selenium/issues/15788
+    #     if extensions_installed > 0:
+    #         browsersettings.add_argument("--disable-features=DisableLoadExtensionCommandLineSwitch")
 
     # instantiate Selenium webdriver + browser, load blank page
     if browser == "chrome":
@@ -397,11 +430,34 @@ def init_webdriver(
             webdriver = utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended(webdriver, eventlistener)  # type: ignore[assignment]
     webdriver.get("about:blank")
 
-    # install requested extensions - Firefox
-    if browser == "firefox" and extensionspath != "":
-        extensions_installed = evaluate_extensionspath(
-            webdriver.install_addon, extensionspath
-        )
+    # determine extensions path
+    extensionspath = check_configpath(config_without_default, inisection, "extensionspath")
+    if extensionspath == "":
+        extensionspath = check_configpath(config, browser, "extensionspath")
+    if extensionspath == "":
+        extensionspath = check_usrpath(config, browser, "usrpath_suffix_ext")
+    if extensionspath == "":
+        err_msg = f"Extensions for Browser '{browser}' could not be found in path defined in config file."
+        raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+
+    # install requested extensions - Firefox (replaced by BiDi implementation)
+    # if browser == "firefox" and extensionspath != "":
+    #     extensions_installed = evaluate_extensionspath(webdriver.install_addon, extensionspath)
+    # install requested extensions - use BiDi implementation, wrapper to assign parameter in correct extensiondata type
+    if extensionspath != "":
+        if browser == "chrome":
+            # Chrome does not yet  support archive or base64 extensiondata format -> alternative installwrapper
+            installwrapper = lambda extensionparam: webdriver.webextension.install(path=extensionparam)  # noqa: E731
+            extensions_installed = evaluate_extensionspath(installwrapper, extensionspath, unpack=True)
+        if browser == "firefox":
+            installwrapper = lambda extensionparam: webdriver.webextension.install(archive_path=extensionparam)  # noqa: E731
+            extensions_installed = evaluate_extensionspath(installwrapper, extensionspath)
+    # close browser windows from extensions
+    if extensions_installed > 0:
+        webdriver.wait4HTMLstable()
+        if len(webdriver.window_handles) > 1:
+            while len(webdriver.window_handles) > 1:
+                webdriver.close()
 
     # set implicitly wait if defined
     if implicitlywait != 0:
@@ -410,13 +466,6 @@ def init_webdriver(
     # set maxpage load
     if maxpageload != 0:
         webdriver.set_page_load_timeout(maxpageload)
-
-    # close browser windows from extensions
-    if extensions_installed > 0:
-        webdriver.wait4HTMLstable()
-        if len(webdriver.window_handles) > 1:
-            while len(webdriver.window_handles) > 1:
-                webdriver.close()
 
     # activate stealth mode (so far only available for chrome)
     if stealthmode:
@@ -461,7 +510,7 @@ def init_webdriver(
     # make sure closepopup log is closed when application ends
     atexit.register(close_log_closepopup, webdriver)
     # make sure webdriver process is killed when application ends
-    atexit.register(kill_driver_processes, browser, webdriver.service.process.pid)
+    atexit.register(kill_driver_processes, browser, webdriver.service.process.pid)  # type: ignore[union-attr]
 
     return webdriver
 
@@ -652,7 +701,7 @@ def connect_chrome(
     # make sure webdriver process(es) is/are killed when application ends
     # -> does not need to happen as chromedriver.exe of calling application might be killed?
     # atexit.register(os.kill, webdriver.service.process.pid, signal.SIGTERM)
-    atexit.register(kill_driver_processes, browser, webdriver.service.process.pid)
+    atexit.register(kill_driver_processes, browser, webdriver.service.process.pid)  # type: ignore[union-attr]
 
     return webdriver
 
@@ -934,6 +983,42 @@ def close_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver) -> None:
         if webdriver.closepopup_logger is not None:
             for handler in webdriver.closepopup_logger.handlers:
                 handler.close()
+
+
+# get Chrome userdata directory (required for workaround to install extensions)
+def getChromeUserDataDir(webdriver: Optional[utils_seleniumxp._RemoteWebDriver] = None) -> Optional[str]:
+    """
+    getChromeUserDataDir - get user-data directory set in commandline
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver object
+
+    Returns:
+        str: user-data-dir ist set in command line
+    """
+
+    if webdriver is not None:
+        return webdriver.caps["chrome"]["userDataDir"]
+    else:
+        for p in psutil.process_iter(['name', 'cmdline']):
+            if p.info['name'] and 'chrome' in p.info['name'].lower():
+                cmd = p.info['cmdline']
+                for arg in cmd:
+                    if arg.startswith("--user-data-dir="):
+                        return arg.split("=", 1)[1]
+    return None
+
+def get_Chrome_userdata_dir(webdriver: Optional[utils_seleniumxp._RemoteWebDriver]) -> Optional[str]:
+    """
+    get_Chrome_userdata_dir - get user-data directory set in commandline
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver object
+
+    Returns:
+        str: user-data-dir ist set in command line
+    """
+    return getChromeUserDataDir(webdriver)
 
 
 # clean up driver processes
