@@ -48,7 +48,7 @@ Webdriver extensions include:
 
 
 
-from typing import cast, Optional, TypeVar, Union
+from typing import cast, Callable, Optional, TypeVar, Union
 from collections.abc import Generator
 
 import contextlib
@@ -109,9 +109,13 @@ class _WebDriverMixin:
 
     # mixin for find_shadowroot, find_elements_shadowdom and find_element_shadowdom
 
-    def find_root_shadowdom(self, by: utils_seleniumxp.By, value: str) ->  Optional[utils_seleniumxp._ShadowRoot]:
+    def find_root_shadowdom_simple(self, by: utils_seleniumxp.By, value: str) ->  Optional[utils_seleniumxp._ShadowRoot]:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
-        return find_root_shadowdom(self, by, value)
+        return find_root_shadowdom_simple(self, by, value)
+
+    def find_root_shadowdom(self, locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]) ->  Optional[utils_seleniumxp._ShadowRoot]:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        return find_root_shadowdom(self, locator_list)
 
     def find_elements_shadowdom_simple(
         self, by: utils_seleniumxp.By, value: str, shadowroot: Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]
@@ -120,7 +124,7 @@ class _WebDriverMixin:
         return find_elements_shadowdom_simple(self, by, value, shadowroot)
 
     def find_elements_shadowdom(
-        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+        self, locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
     ) -> Optional[list[utils_seleniumxp._WebElement]]:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_elements_shadowdom(self, locator_list, shadowroot)
@@ -132,28 +136,28 @@ class _WebDriverMixin:
         return find_element_shadowdom_simple(self, by, value, shadowroot)
 
     def find_element_shadowdom(
-        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+        self, locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
     ) -> Optional[utils_seleniumxp._WebElement]:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return find_element_shadowdom(self, locator_list, shadowroot)
 
-    # mixin for is_present_shadowdom
+    # mixin for is_present_shadowdom / is_element_present_shadowdom
 
     def is_present_shadowdom(
-        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+        self, locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
     ) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return is_present_shadowdom(self, locator_list, shadowroot)
 
     def is_element_present_shadowdom(
-        self, locator_list: list[utils_seleniumxp.SeleniumLocator], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
+        self, locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
     ) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
-        return is_element_present_shadowdom(self, locator_list, shadowroot)
+        return is_present_shadowdom(self, locator_list, shadowroot)
 
     # mixin for hover over element
     def hover_over_element(
-        self, by: utils_seleniumxp.By, value: str, by_host: Optional[utils_seleniumxp.By], value_host: Optional[str]
+        self, by: utils_seleniumxp.By, value: str, by_host: Optional[utils_seleniumxp.By] = None, value_host: Optional[str] = None
     ) -> None:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         hover_over_element(self, by, value, by_host, value_host)
@@ -172,7 +176,7 @@ class _WebDriverMixin:
         check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+        locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
     ) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return closepopup(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
@@ -184,7 +188,7 @@ class _WebDriverMixin:
         check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+        locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
     ) -> None:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         closepopup_queueadd(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
@@ -272,7 +276,7 @@ class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.Eve
         check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+        locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
     ) -> bool:
         return closepopup_eventfiring(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
 
@@ -283,7 +287,7 @@ class EventFiringWebDriverExtendedMixedin(utils_seleniumxp.eventfiring_addon.Eve
         check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+        locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
     ) -> bool:
         return closepopup_queueadd_eventfiring(self, locator_click, wait_click, check_click, locator_iframe, wait_iframe, locator_shadowdomhost)
 
@@ -406,21 +410,32 @@ if not utils_seleniumxp.mixinactive:
     setattr(utils_seleniumxp._RemoteWebDriver, "find_elements_optimized", find_elements_optimized)
 
 
-# find elements in shadow DOM
+# find elements in shadowDOM
 
 # Note:
 # - remember to escape quotes in CSS selectors
 # - when integrating into event firing webdriver watch out due to recursive call like for closepopup
 # - *_simple functions/methods are stubs for overhauled old logic
 
-# find shadow DOM root
-def find_root_shadowdom(
+# utility function to cssify locator
+def _prepare_selector(locator: utils_seleniumxp.SeleniumLocator) -> str:
+
+    if locator.by == utils_seleniumxp.By.XPATH:
+        return cssify.cssify(locator.value)
+    elif locator.by == utils_seleniumxp.By.CSS_SELECTOR:
+        return locator.value
+    else:
+        err_msg = "Only CSS selector allowed together with element in shadowDOM."
+        raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+
+# find shadowDOM root (old/simple version)
+def find_root_shadowdom_simple(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     by: utils_seleniumxp.By,
     value: str
 ) -> Optional[utils_seleniumxp._ShadowRoot]:
     """
-    find_root_shadowdom - find shadowDOM root
+    find_root_shadowdom_simple - find shadowDOM root
 
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): browser
@@ -431,16 +446,109 @@ def find_root_shadowdom(
         Optional[utils_seleniumxp._WebElement]: shadowDOM root if found
     """
 
-    shadowhost = webdriver.find_element(by, value)
-    try:
-        # shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
-        shadowroot = shadowhost.shadow_root
-    except Exception:
-        shadowroot = None
+    shadowroot = None
+    if webdriver.is_present(by, value):
+        shadowhost = webdriver.find_element(by, value)
+        try:
+            # shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
+            shadowroot = shadowhost.shadow_root
+        except Exception:
+            shadowroot = None
 
     return shadowroot
 
-# find elements in shadow DOM old/simple version
+# find shadowDOM root with support for nested shadowDOM
+def find_root_shadowdom(
+    webdriver: utils_seleniumxp._RemoteWebDriver,
+    locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]],
+    loggercall: Optional[Callable] = None,
+    raise_exception: Optional[bool] = False,
+    debug: Optional[bool] = None
+) -> Optional[utils_seleniumxp._ShadowRoot]:
+    """
+    find_root_shadowdom - find shadowDOM root with support for nested shadowDOM
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): browser
+        locator_list: (Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], optional): locator list to shadowDOM host. Defaults to None.
+        loggercall: (Callable, optional) = log function for error. Defaults to None.
+        raise_exception: (bool, optional): flag to raise exception inc ase of any error in shadowDOM evaluation. Defaults to False.
+        debug (bool, optional): flag for debug mode to proecess evers nest level in shadowDOM separately. Defaults to False.
+
+    Returns:
+        Optional[utils_seleniumxp._WebElement]: shadowDOM root if found
+    """
+
+    def _execute_find_shadowroot(
+        webdriver: utils_seleniumxp._RemoteWebDriver,
+        script: str,
+        scriptparam: object,
+        err_msg: str,
+        loggercall: Optional[Callable] = None,
+        raise_exception: Optional[bool] = False
+    ) -> Optional[utils_seleniumxp._ShadowRoot]:
+
+        try:
+            shadowroot = webdriver.execute_script(script, scriptparam)
+        except Exception:
+            shadowroot = None
+        if shadowroot is None:
+            if loggercall is not None:
+                loggercall(err_msg)
+            if raise_exception:
+                raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+        return shadowroot
+
+    if not isinstance(locator_list, list):
+        locator_list = [locator_list]
+    if len(locator_list) >= 1:
+        # evaluate first locator - use optimized check for presence
+        shadowroot = None
+        shadowhost = locator_list[0]
+        if webdriver.is_present(*shadowhost):
+            shadowroot = _execute_find_shadowroot(
+                webdriver,
+                "return arguments[0].shadowRoot",
+                webdriver.find_element(*shadowhost),
+                f"Locator {shadowhost} is not a valid unique locator to a shadowDOM host.",
+                loggercall,
+                raise_exception
+            )
+        if shadowroot is not None:
+            # evaluate rest of locator list
+            queryselector = ""
+            for i in range(1, len(locator_list) - 1):
+                if debug:
+                    shadowroot = _execute_find_shadowroot(
+                        webdriver,
+                        f"return arguments[0].querySelector('{_prepare_selector(locator_list[i])}').shadowRoot",
+                        shadowroot,
+                        f"Locator {locator_list[i]} is not a valid unique locator to a shadowDOM host.",
+                        loggercall,
+                        raise_exception
+                    )
+                else:
+                    queryselector = queryselector + ".querySelector('" + _prepare_selector(locator_list[i]) + "').shadowRoot"
+            if not debug:
+                shadowroot = _execute_find_shadowroot(
+                    webdriver,
+                    f"return arguments[0]{queryselector}",
+                    shadowroot,
+                    f"Locatorlist {locator_list} contains invalid/not unique locator to a shadowDOM host.",
+                    loggercall,
+                    raise_exception
+                )
+        return shadowroot
+
+    err_msg = f"Locatorlist {locator_list} is empty."
+    if loggercall is not None:
+        loggercall(err_msg)
+    if raise_exception:
+        raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+
+    return None
+
+# find elements in shadowDOM (old/simple version)
 def find_elements_shadowdom_simple(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     by: utils_seleniumxp.By,
@@ -461,14 +569,14 @@ def find_elements_shadowdom_simple(
     """
     return find_elements_shadowdom(webdriver, [utils_seleniumxp.SeleniumLocator(by, value)], shadowroot)
 
-# find elements in shadow DOM with support for nested DOM - with root as optional parameter
+# find elements in shadowDOM with support for nested shadowDOM
 def find_elements_shadowdom(
     webdriver: utils_seleniumxp._RemoteWebDriver,
-    locator_list: list[utils_seleniumxp.SeleniumLocator],
+    locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]],
     shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
 ) -> Optional[list[utils_seleniumxp._WebElement]]:
     """
-    find_elements_shadowdom - find elements in shadowDOM with support for nested shadowDOM
+    find_elements_shadowdom - find elements in shadowDOM with support for nested shadowDOM and root element as optional parameter
 
     Note: every item in the locator list must be a locator to a host of another shadowDOM root.
     The routine also accepts the shadowhost element and derives the shadowroot automatically.
@@ -476,34 +584,30 @@ def find_elements_shadowdom(
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         locator_list (list[utils_seleniumxp.SeleniumLocator]): locator list
-        shadowroot (Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
+        shadowroot (Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
 
     Returns:
         Optional[list[utils_seleniumxp._WebElement]]: list of webelements in shadowDOM if found
     """
 
-    def prepare_selector(locator: utils_seleniumxp.SeleniumLocator) -> str:
-
-        if locator.by == utils_seleniumxp.By.XPATH:
-            return cssify.cssify(locator.value)
-        elif locator.by == utils_seleniumxp.By.CSS_SELECTOR:
-            return locator.value
-        else:
-            err_msg = "Only CSS selector allowed together with element in shadowDOM."
-            raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
-
+    if not isinstance(locator_list, list):
+        locator_list = [locator_list]
     if len(locator_list) > 1 or shadowroot is not None:
         queryselector = ""
         for i in range(0, len(locator_list) - 1):
-            queryselector = queryselector + ".querySelector('" + prepare_selector(locator_list[i]) + "').shadowRoot"
-        queryselector = queryselector + ".querySelectorAll('" + prepare_selector(locator_list[-1]) + "')"
+            queryselector = queryselector + ".querySelector('" + _prepare_selector(locator_list[i]) + "').shadowRoot"
+        queryselector = queryselector + ".querySelectorAll('" + _prepare_selector(locator_list[-1]) + "')"
         if shadowroot is not None:
             if shadowroot.__class__.__name__ != "ShadowRoot":
-                # overcome issue that ShadwoDOM host but not root is provided
+                # overcome issue that shadowDOM host but not root is provided
                 # try to treat shadowroot as host to derive correct root
                 try:
                     shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowroot)
                 except Exception:
+                    shadowroot = None
+                if shadowroot is None:
+                    err_msg = "Provided webelement is neither a ShadowRoot nor a ShadowHost."
+                    raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
                     return None
             # overcome issue with id attribute, discovered missing in JSON return when accessing shadow root in May 2025
             if not hasattr(shadowroot, "id"):
@@ -521,7 +625,7 @@ def find_elements_shadowdom(
         err_msg = "No sufficient selector information provided to access element in shadowDOM."
         raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
-# find element in shadow DOM old/simple version
+# find element in shadowDOM (old/simple version)
 def find_element_shadowdom_simple(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     by: utils_seleniumxp.By,
@@ -542,10 +646,10 @@ def find_element_shadowdom_simple(
     """
     return find_element_shadowdom(webdriver, [utils_seleniumxp.SeleniumLocator(by, value)], shadowroot)
 
-# find element in shadow DOM with support for nested DOM - with top root as optional parameter
+# find element in shadowDOM with support for nested shadowDOM and root element as optional parameter
 def find_element_shadowdom(
     webdriver: utils_seleniumxp._RemoteWebDriver,
-    locator_list: list[utils_seleniumxp.SeleniumLocator],
+    locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]],
     shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
 ) -> Optional[utils_seleniumxp._WebElement]:
     """
@@ -556,7 +660,7 @@ def find_element_shadowdom(
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         locator_list (list[utils_seleniumxp.SeleniumLocator]): locator list
-        shadowroot (Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
+        shadowroot (Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
 
     Returns:
         Optional[utils_seleniumxp._WebElement]: webelement in shadowDOM if found
@@ -567,15 +671,15 @@ def find_element_shadowdom(
         if len(webelts) == 1:
             return webelts[0]
         else:
-            err_msg = "Multiple elements for descriptor in shadow DOM"
+            err_msg = "Multiple elements for descriptor in shadowDOM"
             raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
     else:
         return None
 
-# check if element present in shadow DOM with support for nested DOM - top root as optional parameter
+# check if element present in shadowDOM with support for nested shadowDOM
 def is_present_shadowdom(
     webdriver: utils_seleniumxp._RemoteWebDriver,
-    locator_list: list[utils_seleniumxp.SeleniumLocator],
+    locator_list: Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]],
     shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
 ) -> bool:
     """
@@ -586,7 +690,7 @@ def is_present_shadowdom(
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         locator_list (list[utils_seleniumxp.SeleniumLocator]): locator list
-        shadowroot (Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
+        shadowroot (Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
 
     Returns:
         bool: flag if element is present or not
@@ -595,19 +699,10 @@ def is_present_shadowdom(
     webelts = find_elements_shadowdom(webdriver, locator_list, shadowroot)
     return webelts is not None and webelts != []
 
-def is_element_present_shadowdom(
-    webdriver: utils_seleniumxp._RemoteWebDriver,
-    locator_list: list[utils_seleniumxp.SeleniumLocator],
-    shadowroot: Optional[Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]] = None
-) -> bool:
-    """
-    is_element_present_shadowdom - check if element is present in shadowDOM (alternative caller for is_present_shadowdom)
-    """
-    return is_present_shadowdom(webdriver, locator_list, shadowroot)
-
 # direct settattr instead of mixin-object but avoid name conflict
 # (not relevant for EventFiringWebDriver)
 if not utils_seleniumxp.mixinactive:
+    setattr(utils_seleniumxp._RemoteWebDriver, "find_root_shadowdom_simple", find_root_shadowdom_simple)
     setattr(utils_seleniumxp._RemoteWebDriver, "find_root_shadowdom", find_root_shadowdom)
     setattr(utils_seleniumxp._RemoteWebDriver, "find_elements_shadowdom_simple", find_elements_shadowdom_simple)
     setattr(utils_seleniumxp._RemoteWebDriver, "find_elements_shadowdom", find_elements_shadowdom)
@@ -624,8 +719,8 @@ def hover_over_element(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     by: utils_seleniumxp.By,
     value: str,
-    by_host: Optional[utils_seleniumxp.By],
-    value_host: Optional[str]
+    by_host: Optional[utils_seleniumxp.By] = None,
+    value_host: Optional[str] = None
 ) -> None:
     """
     hover_over_element - action chain to hover over element
@@ -642,7 +737,7 @@ def hover_over_element(
         if webdriver.is_present(by, value):
             webelement = webdriver.find_element(by, value)
     else:
-        shadowroot = webdriver.find_root_shadowdom(by_host, value_host)
+        shadowroot = webdriver.find_root_shadowdom_simple(by_host, value_host)
         webelement = webdriver.find_element_shadowdom_simple(by, value, shadowroot)
     utils_seleniumxp.WebDriver.ActionChains(webdriver).move_to_element(webelement).perform()
 
@@ -693,17 +788,18 @@ if not utils_seleniumxp.mixinactive:
 
 # close popups - processing via a queue to speed up subsequent tries to close popups via html parsing
 #
-# note: when using shadow DOM ist seems CSS is mandatory at least for end nodes
+# note: when using shadowDOM ist seems CSS is mandatory at least for end nodes
 # see https://github.com/SeleniumHQ/selenium/issues/4971
 
 # close popup using parsel for XPath and CSS
 def closepopup(
         webdriver: utils_seleniumxp._RemoteWebDriver,
         locator_click: utils_seleniumxp.SeleniumLocator,
-        wait_click: float = 0.1, check_click: bool = False,
+        wait_click: float = 0.1,
+        check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+        locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
 ) -> bool:
     """
     closepopup - close popups with use of parsel
@@ -715,7 +811,7 @@ def closepopup(
         check_click (bool, optional): check after click if popup closed. Defaults to False.
         locator_iframe (utils_seleniumxp.SeleniumLocator, optional): locator for iframe containing click object. Defaults to None.
         wait_iframe (float, optional): wait to switch to iframe. Defaults to 1.
-        locator_shadowdomhost (utils_seleniumxp.SeleniumLocator, optional): locator to shadowDOM host. Defaults to None.
+        locator_shadowdomhost (Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], optional): locator list to shadowDOM host. Defaults to None.
 
     Returns:
         bool: flag if a matching popup was found and closed
@@ -728,10 +824,11 @@ def closepopup(
 def closepopup_queueadd(
         webdriver: utils_seleniumxp._RemoteWebDriver,
         locator_click: utils_seleniumxp.SeleniumLocator,
-        wait_click: float = 0.1, check_click: bool = False,
+        wait_click: float = 0.1,
+        check_click: bool = False,
         locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
         wait_iframe: float = 1,
-        locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+        locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
 ) -> None:
     """
     closepopup_queueadd - add entry to closepopop processing queue
@@ -743,7 +840,7 @@ def closepopup_queueadd(
         check_click (bool, optional): check after click if popup closed. Defaults to False.
         locator_iframe (utils_seleniumxp.SeleniumLocator, optional): locator for iframe containing click object. Defaults to None.
         wait_iframe (float, optional): wait to switch to iframe. Defaults to 1.
-        locator_shadowdomhost (utils_seleniumxp.SeleniumLocator, optional): locator to shadowDOM host. Defaults to None.
+        locator_shadowdomhost (Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], optional): locator list to shadowDOM host. Defaults to None.
     """
 
     # check if webdriver has queue attribute already
@@ -791,12 +888,12 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
             webdriver.wait4AJAX()
             queueentry = webdriver.closepopup_queue.popleft()
 
-            locator_click = queueentry["locator_click"]
-            wait_click = queueentry["wait_click"]
-            check_click = queueentry["check_click"]
-            locator_iframe = queueentry["locator_iframe"]
-            wait_iframe = queueentry["wait_iframe"]
-            locator_shadowdomhost = queueentry["locator_shadowdomhost"]
+            locator_click: utils_seleniumxp.SeleniumLocator = queueentry["locator_click"]
+            wait_click: float = queueentry["wait_click"]
+            check_click: bool = queueentry["check_click"]
+            locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = queueentry["locator_iframe"]
+            wait_iframe: float = queueentry["wait_iframe"]
+            locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = queueentry["locator_shadowdomhost"]
 
             if not firstonly or not closedpopup:
 
@@ -825,9 +922,10 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                             webdriver.closepopup_logger.info(f"FRAME not found\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
                     elif len(frames) == 1:
-                        utils_seleniumxp.WebDriverWait(webdriver, wait_iframe).until(utils_seleniumxp.ExpectedConditions.frame_to_be_available_and_switch_to_it(locator_iframe))
+                        utils_seleniumxp.WebDriverWait(webdriver, wait_iframe).until(utils_seleniumxp.ExpectedConditions.frame_to_be_available_and_switch_to_it(locator_iframe))  # type: ignore[arg-type]
+                        # shadowDOM cannot be evaluated via parsel / lxml but first node always not in shadowDOM
                         if (utils_seleniumxp.locatorutils.check_locator(locator_click, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR]) or
-                            utils_seleniumxp.locatorutils.check_locator(locator_shadowdomhost, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR])
+                            utils_seleniumxp.locatorutils.check_locatorlist(locator_shadowdomhost, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR])
                         ):
                             parsedhtml = utils_seleniumxp.locatorutils.parselSelectorExtension(text=webdriver.page_source)
                     elif len(frames) > 1:
@@ -835,31 +933,36 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                             webdriver.closepopup_logger.info(f"FRAME not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
 
-                # find close popup (considering also shadow DOM webelements)
+                # find close popup (considering also shadowDOM webelements)
                 if locator_shadowdomhost is not None:
-                    if utils_seleniumxp.locatorutils.check_locator(locator_shadowdomhost, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR]):
-                        shadowhosts = parsedhtml.css_or_xpath(locator_shadowdomhost).getall()
-                        # re-parse once, sometimes timing problem
-                        if len(shadowhosts) == 0:
-                            parsedhtml = utils_seleniumxp.locatorutils.parselSelectorExtension(text=webdriver.page_source)
-                            shadowhosts = parsedhtml.css_or_xpath(locator_shadowdomhost).getall()
+                    # if utils_seleniumxp.locatorutils.check_locatorlist(locator_shadowdomhost, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR]):
+                    #     shadowhosts = parsedhtml.css_or_xpath(locator_shadowdomhost).getall()
+                    #     # re-parse once, sometimes timing problem (probably caused by opening shadowDOM and loading?)
+                    #     if len(shadowhosts) == 0:
+                    #         parsedhtml = utils_seleniumxp.locatorutils.parselSelectorExtension(text=webdriver.page_source)
+                    #         shadowhosts = parsedhtml.css_or_xpath(locator_shadowdomhost).getall()
+                    # else:
+                    #     shadowhosts = webdriver.find_elements(*locator_shadowdomhost)
+                    # webelts = []
+                    # if len(shadowhosts) == 0:
+                    #     if hasattr(webdriver, "closepopup_logger"):
+                    #         webdriver.closepopup_logger.info(f"ShadowDOM host not found\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
+                    #     continue
+                    # elif len(shadowhosts) == 1:
+                    #     # shadowhost = webdriver.find_element(*locator_shadowdomhost)
+                    #     # shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
+                    #     shadowroot = webdriver.find_root_shadowdom_simple(*locator_shadowdomhost)
+                    #     if shadowroot is not None:
+                    #         webelts = shadowroot.find_elements(*locator_click)
+                    # else:
+                    #     if hasattr(webdriver, "closepopup_logger"):
+                    #         webdriver.closepopup_logger.info(f"ShadowDOM host not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
+                    #     continue
+                    shadowroot = webdriver.find_root_shadowdom(locator_shadowdomhost, webdriver.closepopup_logger.info, raise_exception=False)
+                    if shadowroot is not None:
+                        webelts = shadowroot.find_elements(*locator_click)
                     else:
-                        shadowhosts = webdriver.find_elements(*locator_shadowdomhost)
-                    webelts = []
-                    if len(shadowhosts) == 0:
-                        if hasattr(webdriver, "closepopup_logger"):
-                            webdriver.closepopup_logger.info(f"ShadowDOM host not found\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
-                        continue
-                    elif len(shadowhosts) == 1:
-                        # shadowhost = webdriver.find_element(*locator_shadowdomhost)
-                        # shadowroot = webdriver.execute_script("return arguments[0].shadowRoot", shadowhost)
-                        shadowroot = webdriver.find_root_shadowdom(*locator_shadowdomhost)
-                        if shadowroot is not None:
-                            webelts = shadowroot.find_elements(*locator_click)
-                    else:
-                        if hasattr(webdriver, "closepopup_logger"):
-                            webdriver.closepopup_logger.info(f"ShadowDOM host not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
-                        continue
+                        webdriver.closepopup_logger.info(f"ShadowDOM root not found \t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                 else:
                     if utils_seleniumxp.locatorutils.check_locator(locator_click, {utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR}):
                         webelts = parsedhtml.css_or_xpath(locator_click).getall()
@@ -873,7 +976,8 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                     closedpopup_thisrun = False
                     for webelt in webelts:
                         try:
-                            if webelt.is_displayed() and not webelt.is_overlapped():  # type: ignore[union-attr]
+                            # if webelt.is_displayed() and not webelt.is_overlapped():  # type: ignore[union-attr]
+                            if webelt.is_displayed():
                                 countwindows = len(webdriver.window_handles)
                                 keepwindows = webdriver.window_handles
                                 webelt.click()
@@ -946,7 +1050,7 @@ def closepopup_eventfiring(
     check_click: bool = False,
     locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
     wait_iframe: float = 1,
-    locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+    locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
 ) -> bool:
     """
     closepopup_eventfiring - closepopup for eventfiring webdriver, required to avoid endless recurion loop)
@@ -956,10 +1060,11 @@ def closepopup_eventfiring(
 def closepopup_queueadd_eventfiring(
     webdriver: utils_seleniumxp.eventfiring_addon.EventFiringWebDriverExtended,
     locator_click: utils_seleniumxp.SeleniumLocator,
-    wait_click: float, check_click: bool = False,
+    wait_click: float,
+    check_click: bool = False,
     locator_iframe: Optional[utils_seleniumxp.SeleniumLocator] = None,
     wait_iframe: float = 1,
-    locator_shadowdomhost: Optional[utils_seleniumxp.SeleniumLocator] = None
+    locator_shadowdomhost: Optional[Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]]] = None
 ) -> bool:
     """
     closepopup_queueadd_eventfiring - closepopup_queueadd for eventfiring webdriver, required to avoid endless recurion loop)

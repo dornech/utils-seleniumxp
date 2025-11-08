@@ -24,7 +24,7 @@ module providing Selenium locator tools
 
 
 
-from typing import NamedTuple, Union
+from typing import NamedTuple, Optional, Union
 
 import parsel
 import re
@@ -109,14 +109,14 @@ class parameterizedSeleniumLocator:  # docsig: disable
 
 # check locator list if all of specified type (default By.XPATH or By.CSS_SELECTOR)
 def check_locatorlist(
-    loclist: list[SeleniumLocator],
+    loclist: Optional[Union[SeleniumLocator, list[SeleniumLocator]]],
     loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
 ) -> bool:
     """
     check_locatorlist - check locator list if of type in typelist
 
     Args:
-        loclist(list[SeleniumLocator]): list of SeleniumLocator objects
+        loclist (Union[SeleniumLocator, list[SeleniumLocator], optional): list of SeleniumLocator objects
         loctypes (Union[list[str], set[str], optional): list of locator types. Defaults to [By.XPATH, By.CSS_SELECTOR].
 
     Returns:
@@ -124,27 +124,33 @@ def check_locatorlist(
     """
 
     check = True
-    for locator in loclist:
-        if locator is not None:
-            check = check and (locator.by in loctypes)
+    if loclist is not None:
+        if not isinstance(loclist, list):
+            loclist = [loclist]
+        for locator in loclist:
+            if locator is not None:
+                check = check and (locator.by in loctypes)
     return check
 
 # check single locator if of specified type (default By.XPATH or By.CSS_SELECTOR)
 def check_locator(
-    locator: SeleniumLocator,
+    locator: Optional[SeleniumLocator],
     loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
 ) -> bool:
     """
     check_locator - check locator if of type in typelist
 
     Args:
-        locator (SeleniumLocator): SeleniumLocator object
+        locator (SeleniumLocator, optional): SeleniumLocator object
         loctypes (Union[list[str], set[str], optional): list of locator types. Defaults to [By.XPATH, By.CSS_SELECTOR].
 
     Returns:
         bool: check result
     """
-    return check_locatorlist([locator], loctypes)
+    if locator is not None:
+        return check_locatorlist([locator], loctypes)
+    else:
+        return True
 
 
 # parsel selector wrapping extension to unify calling for the selector types CSS and XPATH

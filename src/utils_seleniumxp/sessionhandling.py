@@ -415,7 +415,7 @@ def init_webdriver(
     # install requested extensions - use BiDi implementation, wrapper to assign parameter in correct extensiondata type
     if extensionspath != "":
         if browser == "chrome":
-            # Chrome does not yet  support archive or base64 extensiondata format -> alternative installwrapper
+            # Chrome does not yet support archive or base64 extensiondata format -> alternative installwrapper
             installwrapper = lambda extensionparam: webdriver.webextension.install(path=extensionparam)  # noqa: E731
             extensions_installed = _evaluate_extensionspath(installwrapper, extensionspath, unpack=True)
         if browser == "firefox":
@@ -440,7 +440,7 @@ def init_webdriver(
     if stealthmode:
         # set full screen-size as anti-bot measure -> would require screen-size not to be changed by calling programm
         webdriver.maximize_window()
-        # delete  navigator flag
+        # delete navigator flag
         webdriver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")
         # browser-specific stuff
         if browser == "chrome":
