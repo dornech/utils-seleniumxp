@@ -165,7 +165,7 @@ def init_webdriver(
 
     # internal helper for session init routine
 
-    def evaluate_prefsfunction(prefsfunction: Any) -> Union[dict, list[tuple[str, Any]]]:
+    def _evaluate_prefsfunction(prefsfunction: Any) -> Union[dict, list[tuple[str, Any]]]:
 
         if type(prefsfunction) is tuple:
             if len(prefsfunction) == 1:
@@ -181,7 +181,7 @@ def init_webdriver(
             err_msg = f"Browser preference set {prefsfunction[0]} not defined."
             raise utils_seleniumxp.ErrorUtilsSelenium(err_msg) from exc_prefscfuntion_eval
 
-    def evaluate_extensionspath(evalfunc: Callable[[str], None], extensionspath: str, unpack: bool = False) -> int:
+    def _evaluate_extensionspath(evalfunc: Callable[[str], None], extensionspath: str, unpack: bool = False) -> int:
 
         extensions_installed = 0
         if "extensions" in config[inisection]:
@@ -310,7 +310,7 @@ def init_webdriver(
         # options / preferences
         prefsdict: dict = {}
         for prefsfunction in settings:
-            prefs = evaluate_prefsfunction(prefsfunction)
+            prefs = _evaluate_prefsfunction(prefsfunction)
             prefsdict = {**prefsdict, **prefs}  # type: ignore[dict-item]
         if len(prefsdict) > 0:
             browsersettings.add_experimental_option("prefs", prefsdict)
@@ -352,15 +352,12 @@ def init_webdriver(
             if sessionstartlog is not None:
                 sessionstartlog.info("Preferences / Options:")
             for prefsfunction in settings:
-                prefs = evaluate_prefsfunction(prefsfunction)
+                prefs = _evaluate_prefsfunction(prefsfunction)
                 for pref in prefs:
                     browsersettings.set_preference(pref[0], pref[1])
                     # log FireFox prefs
                     if sessionstartlog is not None:
                         sessionstartlog.info(f"- {pref[0]}: {pref[1]}")
-
-        # does not work anymore with Selenium 4.x
-        # browsersettings.set_preference("xpinstall.signatures.required", False)   # for unsigned extensions
 
         # settings for Firefox
         pass
@@ -380,31 +377,6 @@ def init_webdriver(
     # set browser binary location in webdriver/browser profile
     if browserbinarypath is not None:
         browsersettings.binary_location = os.path.join(browserbinarypath, browserbinary)
-
-    # install requested extensions
-    # Selenium 3.x: not working properly with FireFox but no error message
-    # Selenium 4.x: sub-routine evaluate as Chrome includes add-on in options but firefox requires webdriver start first
-    # Chrome > 138: add_extensions deprecated
-    # extensionspath = check_configpath(config_without_default, inisection, "extensionspath")
-    # if extensionspath == "":
-    #     extensionspath = check_configpath(config, browser, "extensionspath")
-    # if extensionspath == "":
-    #     extensionspath = check_usrpath(config, browser, "usrpath_suffix_ext")
-    # if extensionspath == "":
-    #     err_msg = f"Extensions for Browser '{browser}' could not be found in path defined in config file."
-    #     raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
-
-    # install requested extensions - Chrome (until Chrome 136.xxx.xxx )
-    # Chrome > 136: --load_extension and subsequently ChromeOptions.add_Extensions deprecated, see https://github.com/SeleniumHQ/selenium/issues/15788
-    # if browser == "chrome" and extensionspath != "":
-    #
-    #     assert isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions)
-    #     extensions_installed = evaluate_extensionspath(
-    #         browsersettings.add_extension, extensionspath
-    #     )
-    #     # fix according to https://github.com/SeleniumHQ/selenium/issues/15788
-    #     if extensions_installed > 0:
-    #         browsersettings.add_argument("--disable-features=DisableLoadExtensionCommandLineSwitch")
 
     # instantiate Selenium webdriver + browser, load blank page
     if browser == "chrome":
@@ -440,18 +412,15 @@ def init_webdriver(
         err_msg = f"Extensions for Browser '{browser}' could not be found in path defined in config file."
         raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
-    # install requested extensions - Firefox (replaced by BiDi implementation)
-    # if browser == "firefox" and extensionspath != "":
-    #     extensions_installed = evaluate_extensionspath(webdriver.install_addon, extensionspath)
     # install requested extensions - use BiDi implementation, wrapper to assign parameter in correct extensiondata type
     if extensionspath != "":
         if browser == "chrome":
             # Chrome does not yet  support archive or base64 extensiondata format -> alternative installwrapper
             installwrapper = lambda extensionparam: webdriver.webextension.install(path=extensionparam)  # noqa: E731
-            extensions_installed = evaluate_extensionspath(installwrapper, extensionspath, unpack=True)
+            extensions_installed = _evaluate_extensionspath(installwrapper, extensionspath, unpack=True)
         if browser == "firefox":
             installwrapper = lambda extensionparam: webdriver.webextension.install(archive_path=extensionparam)  # noqa: E731
-            extensions_installed = evaluate_extensionspath(installwrapper, extensionspath)
+            extensions_installed = _evaluate_extensionspath(installwrapper, extensionspath)
     # close browser windows from extensions
     if extensions_installed > 0:
         webdriver.wait4HTMLstable()
