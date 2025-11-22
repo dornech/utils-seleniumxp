@@ -15,7 +15,7 @@ build-backend = "hatchling.build"
 name = "utils-seleniumxp"
 description = "Package with utilities and functional extensions for Selenium webdriver Python language bindings"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 # only license identifier from https://spdx.org/licenses/ are allowed
 license = { text = "GPL-3.0-only" }
 # keywords for easier look-up on PyPI
@@ -29,11 +29,11 @@ authors = [
 # options under https://pypi.org/classifiers/
 classifiers = [
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
 ]
 # direct dependencies of this package, installed when users `pip install utils-seleniumxp` later.
