@@ -21,7 +21,7 @@ Webdriver extensions include:
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B010, E301, E305, E501, PLR0904, PLR0914, PLR0917, PLR1702, PLR5501, S101, SIM102
+# ruff: noqa: B010, E301, E305, E501, PLR0904, PLR0914, PLR0917, PLR1702, PLR5501, S101, SIM102, UP007, UP035, UP045
 #
 # disable mypy errors
 # mypy: disable-error-code = "no-any-return, attr-defined, unused-ignore"
@@ -473,7 +473,7 @@ def find_root_shadowdom(
         locator_list: (Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], optional): locator list to shadowDOM host. Defaults to None.
         loggercall: (Callable, optional) = log function for error. Defaults to None.
         raise_exception: (bool, optional): flag to raise exception inc ase of any error in shadowDOM evaluation. Defaults to False.
-        debug (bool, optional): flag for debug mode to proecess evers nest level in shadowDOM separately. Defaults to False.
+        debug (bool, optional): flag for debug mode to process every nesting level in shadowDOM separately. Defaults to False.
 
     Returns:
         Optional[utils_seleniumxp._WebElement]: shadowDOM root if found
@@ -517,7 +517,7 @@ def find_root_shadowdom(
         if shadowroot is not None:
             # evaluate rest of locator list
             queryselector = ""
-            for i in range(1, len(locator_list) - 1):
+            for i in range(1, len(locator_list)):
                 if debug:
                     shadowroot = _execute_find_shadowroot(
                         webdriver,
