@@ -34,8 +34,6 @@ the Selenium project including not covered standard functions
 
 
 
-from typing import Optional
-
 import sys
 import logging
 
@@ -53,7 +51,7 @@ class SimpleEventListener(AbstractEventListenerExtended):
 
     def __init__(
         self,
-        loggername: Optional[str] = None,
+        loggername: str | None = None,
         events_include_list: list[str] = [],
         events_exclude_list: list[str] = [],
         events_generic_list: list[str] = []

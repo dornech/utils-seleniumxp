@@ -24,7 +24,7 @@ module providing Selenium locator tools
 
 
 
-from typing import NamedTuple, Optional, Union
+from typing import NamedTuple
 
 import parsel
 import re
@@ -40,7 +40,7 @@ class SeleniumLocator(NamedTuple):
     """
     SeleniumLocator - locator as namedtuple (dataclass leads to error as unpack operator will not work)
     """
-    by: Union[By, str]
+    by: By | str
     value: str
 
 
@@ -109,8 +109,8 @@ class parameterizedSeleniumLocator:  # docsig: disable
 
 # check locator list if all of specified type (default By.XPATH or By.CSS_SELECTOR)
 def check_locatorlist(
-    loclist: Optional[Union[SeleniumLocator, list[SeleniumLocator]]],
-    loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
+    loclist: SeleniumLocator | list[SeleniumLocator] | None,
+    loctypes: list[str] | set[str] = {By.XPATH, By.CSS_SELECTOR}
 ) -> bool:
     """
     check_locatorlist - check locator list if of type in typelist
@@ -134,8 +134,8 @@ def check_locatorlist(
 
 # check single locator if of specified type (default By.XPATH or By.CSS_SELECTOR)
 def check_locator(
-    locator: Optional[SeleniumLocator],
-    loctypes: Union[list[str], set[str]] = {By.XPATH, By.CSS_SELECTOR}
+    locator: SeleniumLocator | None,
+    loctypes: list[str] | set[str] = {By.XPATH, By.CSS_SELECTOR}
 ) -> bool:
     """
     check_locator - check locator if of type in typelist

@@ -61,7 +61,8 @@ Currently full support is implemented for Chrome and Firefox only.
 
 
 
-from typing import Any, Callable, Optional, Union
+from typing import Any
+from collections.abc import Callable
 
 import os
 # switch to pathlib postponed as os is required
@@ -110,20 +111,20 @@ optimizedscraping_default = False
 
 # initialize selenium driver including starting new browser instance
 def init_webdriver(
-    browser: Optional[str] = None,
-    inifile: Optional[str] = None,
+    browser: str | None = None,
+    inifile: str | None = None,
     inisection: str = "DEFAULT",
-    settings: list[Union[tuple[str], tuple[str, list[Any]]]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
+    settings: list[tuple[str] | tuple[str, list[Any]]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
     debugport: int = 0,
     implicitlywait: int = 10,
     maxpageload: int = 30,
     mixin: bool = utils_seleniumxp.mixinactive,
-    eventlistener: Optional[utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended] = None,
+    eventlistener: utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended | None = None,
     stealthmode: bool = stealthmode_default,
     optimizedscraping: bool = optimizedscraping_default,
     URL: str = "about:blank",
-    alt_cls_webdriverwrapper: Optional[type[utils_seleniumxp._RemoteWebDriver]] = None,
-    alt_cls_options: Union[type[utils_seleniumxp.WebDriver.ChromeOptions], type[utils_seleniumxp.WebDriver.FirefoxOptions], None] = None
+    alt_cls_webdriverwrapper: type[utils_seleniumxp._RemoteWebDriver] | None = None,
+    alt_cls_options: type[utils_seleniumxp.WebDriver.ChromeOptions] | type[utils_seleniumxp.WebDriver.FirefoxOptions] | None = None
 ) -> utils_seleniumxp._RemoteWebDriver:
     """
     init_webdriver - initialize Selenium webdriver session
@@ -165,7 +166,7 @@ def init_webdriver(
 
     # internal helper for session init routine
 
-    def _evaluate_prefsfunction(prefsfunction: Any) -> Union[dict, list[tuple[str, Any]]]:
+    def _evaluate_prefsfunction(prefsfunction: Any) -> dict | list[tuple[str, Any]]:
 
         if type(prefsfunction) is tuple:
             if len(prefsfunction) == 1:
@@ -255,8 +256,8 @@ def init_webdriver(
         err_msg = f"Browser '{browser}' not supported."
         raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
-    browserbinarypath: Optional[str] = None
-    driverpath: Optional[str] = None
+    browserbinarypath: str | None = None
+    driverpath: str | None = None
 
     # check binaries from config (Windows only)
     if os.name == "nt":
@@ -484,20 +485,20 @@ def init_webdriver(
     return webdriver
 
 def initWebDriver(
-    browser: Optional[str] = None,
-    inifile: Optional[str] = None,
+    browser: str | None = None,
+    inifile: str | None = None,
     inisection: str = "DEFAULT",
-    settings: list[Union[tuple[str], tuple[str, list[Any]]]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
+    settings: list[tuple[str] | tuple[str, list[Any]]] = [("disablenotifications",), ("directdownload", [tempfile.gettempdir()])],
     debugport: int = 0,
     implicitlywait: int = 10,
     maxpageload: int = 30,
     mixin: bool = utils_seleniumxp.mixinactive,
-    eventlistener: Optional[utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended] = None,
+    eventlistener: utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended | None = None,
     stealthmode: bool = stealthmode_default,
     optimizedscraping: bool = optimizedscraping_default,
     URL: str = "about:blank",
-    alt_cls_webdriverwrapper: Optional[utils_seleniumxp._RemoteWebDriver] = None,
-    alt_cls_options: Union[utils_seleniumxp.WebDriver.ChromeOptions, utils_seleniumxp.WebDriver.FirefoxOptions, None] = None
+    alt_cls_webdriverwrapper: utils_seleniumxp._RemoteWebDriver | None = None,
+    alt_cls_options: utils_seleniumxp.WebDriver.ChromeOptions | utils_seleniumxp.WebDriver.FirefoxOptions | None = None
 ) -> utils_seleniumxp._RemoteWebDriver:
     """
     initWebDriver - initialize Selenium webdriver session
@@ -583,12 +584,12 @@ def checkDebugport(debugport: int) -> bool:
 # https://cosmocode.io/how-to-connect-selenium-to-an-existing-browser-that-was-opened-manually/
 def connect_chrome(
     debugport: int,
-    inifile: Optional[str] = None,
+    inifile: str | None = None,
     inisection: str = "DEFAULT",
     mixin: bool = utils_seleniumxp.mixinactive,
-    eventlistener: Optional[utils_seleniumxp.AbstractEventListener] = None,
+    eventlistener: utils_seleniumxp.AbstractEventListener | None = None,
     URL: str = "about:blank"
-) -> Optional[utils_seleniumxp._RemoteWebDriver]:
+) -> utils_seleniumxp._RemoteWebDriver | None:
     """
     connect_chrome - connect to Chrome instance via debugport
 
@@ -613,7 +614,7 @@ def connect_chrome(
     # read config file (standard: selenium.ini)
     config, config_without_default = read_configfile(inifile)
 
-    driverpath: Optional[str] = None
+    driverpath: str | None = None
 
     # check binaries from config (Windows only)
     if os.name == "nt":
@@ -676,12 +677,12 @@ def connect_chrome(
 
 def connectChrome(
     debugport: int,
-    inifile: Optional[str] = None,
+    inifile: str | None = None,
     inisection: str = "DEFAULT",
     mixin: bool = utils_seleniumxp.mixinactive,
-    eventlistener: Optional[utils_seleniumxp.AbstractEventListener] = None,
+    eventlistener: utils_seleniumxp.AbstractEventListener | None = None,
     URL: str = "about:blank"
-) -> Optional[utils_seleniumxp._RemoteWebDriver]:
+) -> utils_seleniumxp._RemoteWebDriver | None:
     """
     connectChrome - connect to Chrome instance via debugport
 
@@ -703,7 +704,7 @@ def connectChrome(
 # utilities for initialization
 
 # read config file
-def read_configfile(inifile: Optional[str]) -> tuple[configparser.ConfigParser, configparser.ConfigParser]:
+def read_configfile(inifile: str | None) -> tuple[configparser.ConfigParser, configparser.ConfigParser]:
     """
     read_configfile - read config file
 
@@ -737,7 +738,7 @@ def check_configpath(
     configparampath: str,
     binaryfile: str = "",
     checkwd: bool = False
-) -> Optional[str]:
+) -> str | None:
     """
     check_configpath - check path for binaries
     """
@@ -761,7 +762,7 @@ def check_configpath(
 
 # check path parameter from config
 # used to check fallback via userprofile
-def check_usrpath(config: configparser.ConfigParser, inisection: str, configparampathsuffix: str) -> Optional[str]:
+def check_usrpath(config: configparser.ConfigParser, inisection: str, configparampathsuffix: str) -> str | None:
     """
     check_usrpath - check path für user path suffix from config file
     """
@@ -781,7 +782,7 @@ def check_usrpath(config: configparser.ConfigParser, inisection: str, configpara
 
 # config/options-settings for direct download - Chrome & Firefox
 # routine to be used as function parameter for Selenium webdriver initialization/generator function
-def directdownload(browser: str, defaultdir: Optional[str]) -> Union[dict, list, None]:
+def directdownload(browser: str, defaultdir: str | None) -> dict | list | None:
     """
     directdownload - create settings data object with config/options-settings for direct download
 
@@ -819,7 +820,7 @@ def directdownload(browser: str, defaultdir: Optional[str]) -> Union[dict, list,
 
 # config/options-settings for disabling notifications - Chrome & Firefox
 # routine to be used as function parameter for Selenium webdriver initialization/generator function
-def disablenotifications(browser: str) -> Union[dict, list, None]:
+def disablenotifications(browser: str) -> dict | list | None:
     """
     disablenotifications - create settings data object with config/options-settings for disabling notifications
 
@@ -852,7 +853,7 @@ def disablenotifications(browser: str) -> Union[dict, list, None]:
 # https://petertc.medium.com/pro-tips-for-selenium-setup-1855a11f88f8
 # 0 -> default, 1 -> allow, 2 -> block
 # NOTE: cookies must be allowed to click popup "away"
-def optimizedscraping(browser: str) -> Union[dict, list, None]:
+def optimizedscraping(browser: str) -> dict | list | None:
     """
     optimizedscraping - create settings data object with config/options-settings for optimized scraping
 
@@ -892,7 +893,7 @@ def optimizedscraping(browser: str) -> Union[dict, list, None]:
 
 # set up log for session initialization
 
-def set_log_sessionstart(config: configparser.ConfigParser, inisection: str) -> Optional[logging.Logger]:
+def set_log_sessionstart(config: configparser.ConfigParser, inisection: str) -> logging.Logger | None:
     """
     set_log_sessionstart - initialize logger for logging of session start
 
@@ -911,7 +912,7 @@ def set_log_sessionstart(config: configparser.ConfigParser, inisection: str) -> 
     else:
         return None
 
-def close_log_sessionstart(sessionstart_logger: Optional[logging.Logger]) -> None:
+def close_log_sessionstart(sessionstart_logger: logging.Logger | None) -> None:
     """
     close_log_sessionstart - close logger for logging session start
 
@@ -955,7 +956,7 @@ def close_log_closepopup(webdriver: utils_seleniumxp._RemoteWebDriver) -> None:
 
 
 # get Chrome userdata directory (required for workaround to install extensions)
-def getChromeUserDataDir(webdriver: Optional[utils_seleniumxp._RemoteWebDriver] = None) -> Optional[str]:
+def getChromeUserDataDir(webdriver: utils_seleniumxp._RemoteWebDriver | None = None) -> str | None:
     """
     getChromeUserDataDir - get user-data directory set in commandline
 
@@ -977,7 +978,7 @@ def getChromeUserDataDir(webdriver: Optional[utils_seleniumxp._RemoteWebDriver] 
                         return arg.split("=", 1)[1]
     return None
 
-def get_Chrome_userdata_dir(webdriver: Optional[utils_seleniumxp._RemoteWebDriver]) -> Optional[str]:
+def get_Chrome_userdata_dir(webdriver: utils_seleniumxp._RemoteWebDriver | None) -> str | None:
     """
     get_Chrome_userdata_dir - get user-data directory set in commandline
 
@@ -991,7 +992,7 @@ def get_Chrome_userdata_dir(webdriver: Optional[utils_seleniumxp._RemoteWebDrive
 
 
 # clean up driver processes
-def kill_driver_processes(browser: str = "chrome", pid: Optional[int] = None) -> None:
+def kill_driver_processes(browser: str = "chrome", pid: int | None = None) -> None:
     """
     kill_driver_processes - routine to kill driver process(es) for automated clean-up
 
