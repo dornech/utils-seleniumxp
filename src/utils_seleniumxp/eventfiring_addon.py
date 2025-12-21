@@ -35,7 +35,7 @@ module providing event firing and listening - additional functionalities compare
 
 
 
-from typing import Any, Optional
+from typing import Any
 
 import sys
 
@@ -74,7 +74,7 @@ def _wrap_elements(result: Any, ef_driver: "EventFiringWebDriverExtended") -> An
 # for non-elementary webdriver methods (like closepopup) special treatment is implemented
 def _dispatch(
     dispatcher: Any,
-    l_call: Optional[str],
+    l_call: str | None,
     l_args: tuple[Any, ...],
     d_call: str,
     d_args: tuple[Any, ...],
@@ -120,7 +120,7 @@ def _getattr(dispatcher, name: str) -> Any:
 # note that log entry generation for after_event must be included in returned wrapper to keep
 # execution order; however log entry generation for before_event is included as well as for non-method events
 # the log entries do not make too much sense anyway
-def _getattr_dispatch_generic(dispatcher: Any, l_call: Optional[str], l_args: tuple, d_call: str):
+def _getattr_dispatch_generic(dispatcher: Any, l_call: str | None, l_args: tuple, d_call: str):
 
     def _wrap(*args, **kwargs):
 
@@ -184,7 +184,7 @@ class EventFiringWebDriverExtended(EventFiringWebDriver):
 
     def _dispatch(
         self,
-        l_call: Optional[str],
+        l_call: str | None,
         l_args: tuple[Any, ...],
         d_call: str,
         d_args: tuple[Any, ...],
@@ -245,7 +245,7 @@ class EventFiringSwitchTo:
 
     def _dispatch(
         self,
-        l_call: Optional[str],
+        l_call: str | None,
         l_args: tuple[Any, ...],
         d_call: str,
         d_args: tuple[Any, ...]
@@ -287,7 +287,7 @@ class EventFiringAlert:
 
     def _dispatch(
         self,
-        l_call: Optional[str],
+        l_call: str | None,
         l_args: tuple[Any, ...],
         d_call: str,
         d_args: tuple[Any, ...]
@@ -316,7 +316,7 @@ class EventFiringWebElementExtended(EventFiringWebElement):
 
     def _dispatch(
         self,
-        l_call: Optional[str],
+        l_call: str | None,
         l_args: tuple,
         d_call: str,
         d_args: tuple
