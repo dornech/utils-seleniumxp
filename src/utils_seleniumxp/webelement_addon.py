@@ -138,7 +138,6 @@ def scroll_into_view_and_click(
         offset_pixels (int, optional): vertical pixel offset. Defaults to 0.
         align_to_top (bool, optional): flag for alignment to top of page. Defaults to False.
     """
-
     webelement.scroll_into_view(offset_pixels, align_to_top)
     webelement.click()
 
@@ -150,7 +149,6 @@ def scroll_into_viewportmid(webelement: utils_seleniumxp._WebElement) -> None:
     Args:
         webelement (utils_seleniumxp._WebElement): webelement
     """
-
     script = (
             "var viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);"
             "var elementTop = arguments[0].getBoundingClientRect().top;"
@@ -163,6 +161,62 @@ def scroll_into_viewportmid(webelement: utils_seleniumxp._WebElement) -> None:
 setattr(utils_seleniumxp._WebElement, "scroll_into_view", scroll_into_view)
 setattr(utils_seleniumxp._WebElement, "scroll_into_view_and_click", scroll_into_view_and_click)
 setattr(utils_seleniumxp._WebElement, "scroll_into_viewportmid", scroll_into_viewportmid)
+
+
+# web element - set focus
+
+def set_focus(webelement: utils_seleniumxp._WebElement, prevent_scroll: bool = False, focus_visible: bool = False):
+    """
+    set_focus - call focus method of web element
+
+    Args:
+        webelement (utils_seleniumxp._WebElement): webelement to be checked
+        prevent_scroll (bool): flag to prevent scrolling
+        focus_visible(bool) : flag to control visibility of focus
+    """
+    webelement.parent.execute_script("arguments[0].focus({'preventScroll': arguments[1], 'focusVisible': arguments[2]})", webelement, prevent_scroll, focus_visible)
+
+# no mixin-object for WebElement -> direct settattr
+setattr(utils_seleniumxp._WebElement, "set_focus", set_focus)
+
+
+# webelement - check if visible in virtual scroll container
+
+# script for check if webelement is visible in virtual scroll container
+# https://stackoverflow.com/questions/487073/how-to-check-if-element-is-visible-after-scrolling
+script_check_visible = """
+    function IsInVisibleArea(element) {
+        var rect = element.getBoundingClientRect();
+        var rect_top = rect.top;
+        var rect_height = rect.height;
+        element = element.parentNode;
+        if (rect.bottom < 0) return false;
+        if (rect_top > document.documentElement.clientHeight) return false;
+        do {
+             rect = element.getBoundingClientRect();
+             if (rect_top <= rect.bottom === false) return false;
+             if ((rect_top + rect_height) <= rect.top) return false;
+             element = element.parentNode;
+        } while (element != document.body);
+        return true;
+    }
+    return IsInVisibleArea(arguments[0]);
+    """
+
+def check_visible(webelement: utils_seleniumxp._WebElement) -> bool:
+    """
+    check_visible - check if webelement is visible within virtual scroll container
+
+    Args:
+        webelement (utils_seleniumxp._WebElement): webelement to be checked
+
+    Returns:
+        bool: indicator if webelement visible or not
+    """
+    return webelement.parent.execute_script(script_check_visible, webelement)
+
+# no mixin-object for WebElement -> direct settattr
+setattr(utils_seleniumxp._WebElement, "check_visible", check_visible)
 
 
 # webelement - get xpath and CSS selector
@@ -398,7 +452,7 @@ def is_overlapped(webelement: utils_seleniumxp._WebElement) -> bool:
 setattr(utils_seleniumxp._WebElement, "is_overlapped", is_overlapped)
 
 # get overlapping element
-def get_overlapping_element(webelement: utils_seleniumxp._WebElement) -> utils_seleniumxp._WebElement:
+def get_overlapping_element(webelement: utils_seleniumxp._WebElement) -> utils_seleniumxp._WebElement | None:
     """
     get_overlapping_element - get overlapping element
 
