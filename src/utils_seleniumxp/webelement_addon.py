@@ -165,7 +165,7 @@ setattr(utils_seleniumxp._WebElement, "scroll_into_viewportmid", scroll_into_vie
 
 # web element - set focus
 
-def set_focus(webelement: utils_seleniumxp._WebElement, prevent_scroll: bool = False, focus_visible: bool = False):
+def set_focus(webelement: utils_seleniumxp._WebElement, prevent_scroll: bool = False, focus_visible: bool = False) -> None:
     """
     set_focus - call focus method of web element
 
