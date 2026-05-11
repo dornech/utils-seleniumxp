@@ -172,7 +172,7 @@ def set_focus(webelement: utils_seleniumxp._WebElement, prevent_scroll: bool = F
     Args:
         webelement (utils_seleniumxp._WebElement): webelement to be checked
         prevent_scroll (bool): flag to prevent scrolling
-        focus_visible (bool) : flag to control visibility of focus
+        focus_visible (bool): flag to control visibility of focus
     """
     webelement.parent.execute_script("arguments[0].focus({'preventScroll': arguments[1], 'focusVisible': arguments[2]})", webelement, prevent_scroll, focus_visible)
 
