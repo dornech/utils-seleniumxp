@@ -14,11 +14,11 @@ Based on <https://github.com/maresb/hatch-vcs-footgun-example>.
 def _get_hatch_version():
     """Compute the most up-to-date version number in a development environment.
 
-    Returns `None` if Hatchling is not installed, e.g. in a production environment.
-
     For more details, see <https://github.com/maresb/hatch-vcs-footgun-example/>.
     """
     import os
+    # preparation for Pathlib
+    # from  pathlib import path
 
     try:
         from hatchling.metadata.core import ProjectMetadata
@@ -33,9 +33,19 @@ def _get_hatch_version():
         err_msg = "pyproject.toml not found although hatchling is installed"
         raise RuntimeError(err_msg)
     root = os.path.dirname(pyproject_toml)
-    metadata = ProjectMetadata(root=root, plugin_manager=PluginManager())
-    # Version can be either statically set in pyproject.toml or computed dynamically:
-    return metadata.core.version or metadata.hatch.version.cached
+    # preparation for Pathlib
+    # root = Path(pyproject_toml).parent
+    # Temporarily set cwd to project root for PEP 517 compliance.
+    old_cwd = os.getcwd()
+    # preparation for Pathlib
+    # old_cwd = Path.cwd()
+    os.chdir(root)
+    try:
+        metadata = ProjectMetadata(root=str(root), plugin_manager=PluginManager())
+        # Version can be static in pyproject.toml or computed dynamically:
+        return metadata.core.version or metadata.hatch.version.cached
+    finally:
+        os.chdir(old_cwd)
 
 
 def _get_importlib_metadata_version():
