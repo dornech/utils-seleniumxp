@@ -6,7 +6,7 @@ Based on <https://github.com/maresb/hatch-vcs-footgun-example>.
 
 # ruff and mypy per file settings
 # others
-# ruff: noqa: PLC0415
+# ruff: noqa: E302, PLC0415
 
 # fmt: off
 
