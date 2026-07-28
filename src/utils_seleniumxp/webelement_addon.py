@@ -1,6 +1,7 @@
 # Selenium webdriver utilities - XP version
 # webelement - additional functionalities
 # wrapper class not possible as WebElement class is referred to by general webdriver class
+# so monkey-patching approach only
 
 """
 module with webelement class extensions
@@ -32,8 +33,7 @@ Webelement extensions include:
 
 
 # TODO Dev:
-# - extension for mixin classes / own routines
-# - click_and_wait (possibly include scroll_into_view) ?
+# - n. a.
 
 # TODO Test:
 # - n. a.

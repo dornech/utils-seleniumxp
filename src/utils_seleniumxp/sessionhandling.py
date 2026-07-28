@@ -36,12 +36,8 @@ Currently full support is implemented for Chrome and Firefox only.
 # - decorator to check browser type for various functions to simplify code ?
 # - use user profiles ?
 # - additional parameters in INI file Selenium.ini
-#   - implicitlywait
-#   - flag for stealth mode ?
-#   - flag for optimized scraping mode ?
 #   - combine with a wrapper for config
 #     https://github.com/MikeFez/BrowserWrapper/blob/main/BrowserWrapper/browserwrapper.py ?
-# - include/activate webdriver management ?
 # - Firefox improvements (but worth the effort as Chrome is faster anyway and currently causes problems?)
 #   - Firefox eventfiring webdriver: problem with hanging Firefox and hanging processes when checked last time
 #   - re-connect mechanism as for Chrome, seems to be supported from Selenium4 onwards
@@ -61,7 +57,7 @@ Currently full support is implemented for Chrome and Firefox only.
 
 
 
-from typing import Any
+from typing import Any, Literal
 from collections.abc import Callable
 
 import os
@@ -74,7 +70,7 @@ import inspect
 import atexit
 import contextlib
 import psutil
-import signal
+# import signal
 import zipfile
 
 import requests
@@ -107,6 +103,10 @@ stealthmode_default = False
 # switch optimized scraping
 optimizedscraping_default = False
 
+# switch and mode for optimized wait
+smartwait_default = True
+smartwait_mode: Literal["autowait", "waitless"] = "waitless"
+
 
 
 # initialize selenium driver including starting new browser instance
@@ -120,6 +120,7 @@ def init_webdriver(
     maxpageload: int = 30,
     mixin: bool = utils_seleniumxp.mixinactive,
     eventlistener: utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended | None = None,
+    smartwait: bool = smartwait_default,
     stealthmode: bool = stealthmode_default,
     optimizedscraping: bool = optimizedscraping_default,
     URL: str = "about:blank",
@@ -134,7 +135,7 @@ def init_webdriver(
     to the webdriver binary and extension files. A profile section defines the browser, the driver path,
     the extension path and the extensions to be loaded. Config file interpolation might be used for paths.
     Per driver a driver specific section is required defining at least the file for the extensions.
-    Currently settings beyond paths and extensions are not supported.
+    Currently, settings beyond paths and extensions are not supported.
 
     settings:
     settings is provided as a list of callables. The callables must return a browser-specific settings data object.
@@ -154,6 +155,7 @@ def init_webdriver(
         maxpageload (int, optional): max pageload time. Defaults to 20.
         mixin (bool, optional): flag to switch between mixin and setattr mode. Defaults to utils_seleniumxp.mixinactive.
         eventlistener (Optional[utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended], optional): eventlistener object to activate eventfiring mode. Defaults to None.
+        smartwait (bool, optional): flag to activate "smart" wait
         stealthmode (bool, optional): flag to control selenium_stealth mode. Defaults to stealthmode_default.
         optimizedscraping (bool, optional): flag to control optimized settings for scraping (no pictures etc.). Defaults to optimizedscraping_default.
         URL (str, optional): start URL. Defaults to "about:blank".
@@ -433,6 +435,15 @@ def init_webdriver(
     if implicitlywait != 0:
         webdriver.implicitly_wait(implicitlywait)
 
+    if smartwait:
+        if smartwait_mode == "autowait":
+            from selenium_autowait import enable_autowait
+            enable_autowait(timeout=5.0)
+        elif smartwait_mode == "waitless":
+            from waitless import stabilize
+            webdriver = stabilize(webdriver)
+        webdriver._smartwait_mode = smartwait_mode
+
     # set maxpage load
     if maxpageload != 0:
         webdriver.set_page_load_timeout(maxpageload)
@@ -494,6 +505,7 @@ def initWebDriver(
     maxpageload: int = 30,
     mixin: bool = utils_seleniumxp.mixinactive,
     eventlistener: utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended | None = None,
+    smartwait: bool = smartwait_default,
     stealthmode: bool = stealthmode_default,
     optimizedscraping: bool = optimizedscraping_default,
     URL: str = "about:blank",
@@ -528,6 +540,7 @@ def initWebDriver(
         maxpageload (int, optional): max pageload time. Defaults to 20.
         mixin (bool, optional): flag to switch between mixin and setattr mode. Defaults to utils_seleniumxp.mixinactive.
         eventlistener (Optional[utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended], optional): eventlistener object to activate eventfiring mode. Defaults to None.
+        smartwait (bool, optional): flag to activate "smart" wait
         stealthmode (bool, optional): flag to control selenium_stealth mode. Defaults to stealthmode_default.
         optimizedscraping (bool, optional): flag to control optimized settings for scraping (no pictures etc.). Defaults to optimizedscraping_default.
         URL (str, optional): start URL. Defaults to "about:blank".
@@ -540,7 +553,7 @@ def initWebDriver(
     return init_webdriver(
         browser, inifile, inisection, settings, debugport,
         implicitlywait, maxpageload, mixin, eventlistener,
-        stealthmode, optimizedscraping, URL,
+        smartwait, stealthmode, optimizedscraping, URL,
         alt_cls_webdriverwrapper, alt_cls_options
     )
 
@@ -588,6 +601,7 @@ def connect_chrome(
     inisection: str = "DEFAULT",
     mixin: bool = utils_seleniumxp.mixinactive,
     eventlistener: utils_seleniumxp.AbstractEventListener | None = None,
+    smartwait: bool = smartwait_default,
     URL: str = "about:blank"
 ) -> utils_seleniumxp._RemoteWebDriver | None:
     """
@@ -599,6 +613,7 @@ def connect_chrome(
         inisection (str, optional): INI section to be evaluated. Defaults to "DEFAULT".
         mixin (bool, optional): flag to switch between mixin and setattr mode. Defaults to utils_seleniumxp.mixinactive.
         eventlistener (Optional[utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended], optional): eventlistener object to activate eventfiring mode. Defaults to None.
+        smartwait (bool, optional): flag to activate "smart" wait
         URL (str, optional): start URL. Defaults to "about:blank".
 
     Returns:
@@ -659,6 +674,16 @@ def connect_chrome(
             webdriver = utils_seleniumxp.webdriver_addon.EventFiringWebDriverExtendedMixedin(webdriver, eventlistener)  # type: ignore[assignment]
     # webdriver.get("about:blank")
 
+    # activate smartwait
+    if smartwait:
+        if smartwait_mode == "autowait":
+            from selenium_autowait import enable_autowait
+            enable_autowait(timeout=5.0)
+        elif smartwait_mode == "waitless":
+            from waitless import stabilize
+            webdriver = stabilize(webdriver)
+        webdriver._smartwait_mode = smartwait_mode
+
     # set logging for closepopup
     set_log_closepopup(webdriver, config, inisection)
 
@@ -681,6 +706,7 @@ def connectChrome(
     inisection: str = "DEFAULT",
     mixin: bool = utils_seleniumxp.mixinactive,
     eventlistener: utils_seleniumxp.AbstractEventListener | None = None,
+    smartwait: bool = smartwait_default,
     URL: str = "about:blank"
 ) -> utils_seleniumxp._RemoteWebDriver | None:
     """
@@ -692,12 +718,13 @@ def connectChrome(
         inisection (str, optional): INI section to be evaluated. Defaults to "DEFAULT".
         mixin (bool, optional): flag to switch between mixin and setattr mode. Defaults to utils_seleniumxp.mixinactive.
         eventlistener (Optional[utils_seleniumxp.eventfiring_addon.AbstractEventListenerExtended], optional): eventlistener object to activate eventfiring mode. Defaults to None.
+        smartwait (bool, optional): flag to activate "smart" wait
         URL (str, optional): start URL. Defaults to "about:blank".
 
     Returns:
         utils_seleniumxp.WebDriver: webdriver object
     """
-    return connect_chrome(debugport, inifile, inisection, mixin, eventlistener, URL)
+    return connect_chrome(debugport, inifile, inisection, mixin, eventlistener, smartwait, URL)
 
 
 
@@ -1005,16 +1032,19 @@ def kill_driver_processes(browser: str = "chrome", pid: int | None = None) -> No
         err_msg = f"Browser '{browser}' not supported."
         raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
 
+    # 1st try via pid stored
+    with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied, KeyboardInterrupt):
+        # psutil.Process(pid).send_signal(signal.SIGTERM)
+        psutil.Process(pid).terminate()
+    # 2nd try via finding pids running driverbinary
     driverbinary: str = supported_browsers[browser][1]
-    with contextlib.suppress(psutil.NoSuchProcess):
-        psutil.Process(pid).send_signal(signal.SIGTERM)
     pids: list[int] = []
-    try:
-        for proc in psutil.process_iter(["name"]):
-            if proc.info["name"] == driverbinary:
-                if pid is None or pid == proc.pid:
-                    pids.append(proc.pid)
-    except Exception:
-        pass
+    with contextlib.suppress(Exception, KeyboardInterrupt):
+        for proc in psutil.process_iter(["pid", "name"]):
+            with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, OSError):
+                if proc.info["name"] == driverbinary:
+                    if pid is None or pid == proc.pid:
+                        pids.append(proc.pid)
     for pid in pids:  # noqa: PLR1704
-        psutil.Process(pid).send_signal(signal.SIGTERM)
+        # psutil.Process(pid).send_signal(signal.SIGTERM)
+        psutil.Process(pid).terminate()

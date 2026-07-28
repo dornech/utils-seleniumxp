@@ -1,5 +1,6 @@
 # Selenium webdriver utilities - XP version
 # webdriver class - additional functionalities
+# implementaiton via mixin class or monkey-patching alternatively
 
 """
 module with webdriver class extensions
@@ -39,7 +40,8 @@ Webdriver extensions include:
 #     see https://www.selenium.dev/documentation/webdriver/actions_api/wheel/
 # - automatic retry for find_element(s) (see seleniumbase as inspiration) ?
 #   approach 1: derived class with redefinition and call of super-method
-#   approach 2: create wrapped method and re-direct call via setattr
+#   approach 2: create wrapped method and re-direct call via setattr (monkey-patching)
+#   -> might be onbsolete with sleenium-autowait using exactly this monkey-patching approach
 # - implement additional helpers like automated findwait_for_element, download (see horejsek wrapper or selgym)
 #   alternatively: derived class with redefinition and call of super method?
 
@@ -73,7 +75,7 @@ import utils_seleniumxp
 
 # webdriver mixins approach - require Mixin classes to be used for additional functionality
 # mixin-class required per browser specific webdriver class
-# optional: use setattr (assumption: derived wrapper classes should automatically inherit methods)
+# optional: monkey-patching by setattr (assumption: derived wrapper classes should automatically inherit methods)
 
 # mixin object for normal webdriver
 class _WebDriverMixin:
@@ -502,7 +504,7 @@ def find_root_shadowdom(
         webdriver (utils_seleniumxp._RemoteWebDriver): browser
         locator_list: (Union[utils_seleniumxp.SeleniumLocator, list[utils_seleniumxp.SeleniumLocator]], optional): locator list to shadowDOM host. Defaults to None.
         loggercall: (Callable, optional) = log function for error. Defaults to None.
-        raise_exception: (bool): flag to raise exception inc ase of any error in shadowDOM evaluation. Defaults to False.
+        raise_exception: (bool): flag to raise exception in case of any error in shadowDOM evaluation. Defaults to False.
         debug (bool): flag for debug mode to process every nesting level in shadowDOM separately. Defaults to False.
 
     Returns:
@@ -1323,28 +1325,31 @@ def wait4AJAX(webdriver: utils_seleniumxp._RemoteWebDriver, timeout: int = 10, m
         bool: flag if timeout reached
     """
 
-    starttime = time.time()
-    timeoutscript = False
-    try:
-        utils_seleniumxp.WebDriverWait(webdriver, 1).until(lambda webdriver: webdriver.execute_script('return jQuery.active') == 0)
-    except (utils_seleniumxp.WebDriverExceptions.JavascriptException, utils_seleniumxp.WebDriverExceptions.TimeoutException):
-        pass
-    else:
+    # check "smartwait" mode not used
+    if not getattr(webdriver, "_smartwait", None):
+        # chek jQuery state
+        starttime = time.time()
+        timeoutscript = False
         try:
-            utils_seleniumxp.WebDriverWait(webdriver, timeout).until(lambda webdriver: webdriver.execute_script('return jQuery.active') == 0)
+            utils_seleniumxp.WebDriverWait(webdriver, 1).until(lambda webdriver: webdriver.execute_script('return jQuery.active') == 0)
+        except (utils_seleniumxp.WebDriverExceptions.JavascriptException, utils_seleniumxp.WebDriverExceptions.TimeoutException):
+            pass
+        else:
+            try:
+                utils_seleniumxp.WebDriverWait(webdriver, timeout).until(lambda webdriver: webdriver.execute_script('return jQuery.active') == 0)
+            except utils_seleniumxp.WebDriverExceptions.TimeoutException:
+                timeoutscript = True
+        # check document.readyState
+        timeoutdocrs = False
+        try:
+            utils_seleniumxp.WebDriverWait(webdriver, timeout).until(lambda webdriver: webdriver.execute_script('return document.readyState') == 'complete')
         except utils_seleniumxp.WebDriverExceptions.TimeoutException:
-            timeoutscript = True
-
-    timeoutdocrs = False
-    try:
-        utils_seleniumxp.WebDriverWait(webdriver, timeout).until(lambda webdriver: webdriver.execute_script('return document.readyState') == 'complete')
-    except utils_seleniumxp.WebDriverExceptions.TimeoutException:
-        timeoutdocrs = True
-
-    while (time.time() < starttime + min_wait):
-        time.sleep(0.1)
-
-    return timeoutscript or timeoutdocrs
+            timeoutdocrs = True
+        while (time.time() < starttime + min_wait):
+            time.sleep(0.1)
+        return timeoutscript or timeoutdocrs
+    else:
+        return False
 
 # wait for HTML, AJAX script and readyState
 def wait4HTMLstable(webdriver: utils_seleniumxp._RemoteWebDriver, wait: float = 0.1, max_wait: float = 0.5) -> bool:
@@ -1360,14 +1365,20 @@ def wait4HTMLstable(webdriver: utils_seleniumxp._RemoteWebDriver, wait: float = 
         bool: flag if page source is stable
     """
 
-    wait4AJAX(webdriver)
-    HTMLprev = ""
-    starttime = time.time()
-    while (HTMLprev != webdriver.page_source and (time.time() < starttime + max_wait)):
-        HTMLprev = webdriver.page_source
-        time.sleep(wait)
+    # check "smartwait" mode not used
+    if not getattr(webdriver, "_smartwait", None):
+        # call "lower" level wait
+        wait4AJAX(webdriver)
+        HTMLprev = ""
+        starttime = time.time()
+        # check for HTML source stable
+        while (HTMLprev != webdriver.page_source and (time.time() < starttime + max_wait)):
+            HTMLprev = webdriver.page_source
+            time.sleep(wait)
+        return HTMLprev == webdriver.page_source
+    else:
+        return True
 
-    return HTMLprev == webdriver.page_source
 
 # direct setattr instead of mixin-object but avoid name conflict
 if not utils_seleniumxp.mixinactive:

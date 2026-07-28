@@ -43,9 +43,11 @@ dependencies = [
     "psutil",
     "requests",
     "selenium~=4.33.0",
+    "selenium-autowait",
     "selenium-requests",
     "stealthenium>=1.1.1",
-    "utils_mystuff"
+    "utils_mystuff",
+    "waitless"
 ]
 dynamic = ["version"]
 
