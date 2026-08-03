@@ -21,7 +21,7 @@ license = { text = "GPL-3.0-only" }
 # keywords for easier look-up on PyPI
 keywords = [
     "Selenium", "webdriver", "Chrome", "FireFox",
-    "factory function", "event-firing webdriver", "parsel", "close popup"
+    "factory function", "event-firing webdriver", "parsel", "close popup",
 ]
 authors = [
     { name = "dornech", email = "dornech@gmx.de" },
@@ -41,12 +41,13 @@ dependencies = [
     "parsel",
     "psutil",
     "requests",
-    "selenium~=4.33.0",
+    # "selenium~=4.33.0",
+    "selenium",
     "selenium-autowait",
     "selenium-requests",
     "stealthenium>=1.1.1",
     "utils_mystuff",
-    "waitless"
+    "waitless",
 ]
 dynamic = ["version"]
 
@@ -152,7 +153,7 @@ include = [
     "src/**/*.py",
     "src/**/*.pyi",
     "tests/**/*.py",
-    "tests/**/*.pyi"
+    "tests/**/*.pyi",
 ]
 
 [tool.ruff.lint]
