@@ -343,7 +343,7 @@ def init_webdriver(
                 browsersettings.add_experimental_option("useAutomationExtension", False)
             browsersettings.add_argument("--disable-blink-features=AutomationControlled")
         # settings for extensions (partially redundant to BiDi activation)
-        browsersettings.add_argument("--remote-debugging-pipe")
+        # browsersettings.add_argument("--remote-debugging-pipe")   # switch was recently deleted,now causes error!
         browsersettings.add_argument("--enable-unsafe-extension-debugging")
 
         # settings for #BiDi
