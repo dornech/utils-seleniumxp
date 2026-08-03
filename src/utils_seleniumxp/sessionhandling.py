@@ -1003,15 +1003,20 @@ def getChromeUserDataDir(webdriver: utils_seleniumxp._RemoteWebDriver | None = N
         str: user-data-dir ist set in command line
     """
 
+    # look in capabilities of webdriver object
     if webdriver is not None:
-        return webdriver.caps["chrome"]["userDataDir"]
-    else:
-        for p in psutil.process_iter(['name', 'cmdline']):
-            if p.info['name'] and 'chrome' in p.info['name'].lower():
-                cmd = p.info['cmdline']
-                for arg in cmd:
-                    if arg.startswith("--user-data-dir="):
-                        return arg.split("=", 1)[1]
+        try:
+            return webdriver.caps["chrome"]["userDataDir"]
+        except Exception:
+            pass
+
+    # look in command lines of running Chrome processes
+    for p in psutil.process_iter(['name', 'cmdline']):
+        if p.info['name'] and 'chrome' in p.info['name'].lower():
+            cmd = p.info['cmdline']
+            for arg in cmd:
+                if arg.startswith("--user-data-dir="):
+                    return arg.split("=", 1)[1]
     return None
 
 def get_Chrome_userdata_dir(webdriver: utils_seleniumxp._RemoteWebDriver | None) -> str | None:
