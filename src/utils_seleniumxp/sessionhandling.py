@@ -308,7 +308,10 @@ def init_webdriver(
 
         # set options object - some wrappers define own options class
         browsersettings = utils_seleniumxp.WebDriver.ChromeOptions() if alt_cls_options is None else alt_cls_options()
-        assert isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions)
+        assert (
+            isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions) or
+            browsersettings.__class__.__name__ == "ChromeOptions"
+        )
 
         # options / preferences
         prefsdict: dict = {}
@@ -326,12 +329,18 @@ def init_webdriver(
         # settings for Chrome
         browsersettings.add_argument("--disable-features=UserAgentClientHint,OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints")
         browsersettings.add_argument("--disable-search-engine-choice-screen")
+        # avoid problem with undetected-chromedriver
+        # https://github.com/ultrafunkamsterdam/undetected-chromedriver/discussions/2282
+        # if alt_cls_webdriverwrapper is not None and alt_cls_webdriverwrapper.__module__ in {'undetected_chromedriver'}:
+        #     browsersettings.add_argument("--disable-dev-shm-usage")
+        #    browsersettings.add_argument("--disable-blink-features=AutomationControlled")
         # settings in addition to stealth extension from stackoverflow
         # https://stackoverflow.com/questions/53039551/selenium-webdriver-modifying-navigator-webdriver-flag-to-prevent-selenium-detec
         # https://stackoverflow.com/questions/67341346/how-to-bypass-cloudflare-bot-protection-in-selenium
         if stealthmode:
-            browsersettings.add_experimental_option("excludeSwitches", ["enable-automation"])
-            browsersettings.add_experimental_option("useAutomationExtension", False)
+            if alt_cls_webdriverwrapper is None or alt_cls_webdriverwrapper.__module__ not in {'undetected_chromedriver'}:
+                browsersettings.add_experimental_option("excludeSwitches", ["enable-automation"])
+                browsersettings.add_experimental_option("useAutomationExtension", False)
             browsersettings.add_argument("--disable-blink-features=AutomationControlled")
         # settings for extensions (partially redundant to BiDi activation)
         browsersettings.add_argument("--remote-debugging-pipe")
