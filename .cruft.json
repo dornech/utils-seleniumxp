@@ -12,6 +12,7 @@
       "open_source_license": "GPL-3.0-only",
       "target_python_version": "3.11",
       "target_os_platform": "ubuntu-latest, macos-latest, windows-latest",
+      "browser_required": "no-browser",
       "github_username": "dornech",
       "project_repo": "https://github.com/dornech/utils-seleniumxp",
       "pypi_username": "dornech",

@@ -270,7 +270,8 @@ testpaths = [
     "tests",
 ]
 markers = [
-    "local: tests that are not suitable for CI",
+    "integration: integration test cases",
+    "local: test cases not suitable for CI",
 ]
 
 [tool.coverage.run]
