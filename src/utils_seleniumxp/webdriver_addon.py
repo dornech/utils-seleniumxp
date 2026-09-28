@@ -768,7 +768,7 @@ def hover_over_element(
     else:
         shadowroot = webdriver.find_root_shadowdom_simple(by_host, value_host)
         webelement = webdriver.find_element_shadowdom_simple(by, value, shadowroot)
-    utils_seleniumxp.WebDriver.ActionChains(webdriver).move_to_element(webelement).perform()
+    utils_seleniumxp.ActionChains(webdriver).move_to_element(webelement).perform()
 
 # direct settattr instead of mixin-object but avoid name conflict
 # (not relevant for EventFiringWebDriver)

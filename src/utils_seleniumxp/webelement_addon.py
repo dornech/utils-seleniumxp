@@ -22,7 +22,7 @@ Webelement extensions include:
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B010, E305, E501
+# ruff: noqa: B010, E305, E501, RUF105
 #
 # disable mypy errors
 # mypy: disable-error-code = "no-any-return, attr-defined"
@@ -96,7 +96,7 @@ def hover_over(webelement: utils_seleniumxp._WebElement) -> None:
         webelement (utils_seleniumxp._WebElement): webelement
     """
 
-    utils_seleniumxp.WebDriver.ActionChains(webelement.parent).move_to_element(webelement).perform()
+    utils_seleniumxp.ActionChains(webelement.parent).move_to_element(webelement).perform()
 
 # no mixin-object for WebElement -> direct settattr
 setattr(utils_seleniumxp._WebElement, "hover_over", hover_over)
