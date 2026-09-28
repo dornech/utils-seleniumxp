@@ -22,7 +22,7 @@ Webdriver extensions include:
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B010, E301, E305, E501, PLR0904, PLR0914, PLR0917, PLR1702, PLR5501, S101, SIM102
+# ruff: noqa: B010, E301, E305, E501, PLR0904, PLR0914, PLR0917, PLR1702, PLR5501, PLW0717, RUF075, RUF105, S101, SIM102
 #
 # disable mypy errors
 # mypy: disable-error-code = "no-any-return, attr-defined, unused-ignore"
@@ -32,18 +32,16 @@ Webdriver extensions include:
 
 
 # TODO Dev:
-# - more comfortable wait_for
-#   params element, condition, timeout
+# - smartwait module -> implement in webdriver_addon
+# - restructure module for better maintainability (clearer structure, shorter module(s)
+#   - Mixin-class related stuff remains in webdriver_addon.py
+#   - webdriver subdirectory and submoduls for wait support, closepopup, element helpers / shadowDOM
+#   - from <module> import *
+#   - pilot with wait_helper
 # - find_element_frames -> loop across frames automatically?
 # - integrate new Selenium 4.x API functions
 #   - scroll from Actions-API (instead of script calling)
 #     see https://www.selenium.dev/documentation/webdriver/actions_api/wheel/
-# - automatic retry for find_element(s) (see seleniumbase as inspiration) ?
-#   approach 1: derived class with redefinition and call of super-method
-#   approach 2: create wrapped method and re-direct call via setattr (monkey-patching)
-#   -> might be onbsolete with sleenium-autowait using exactly this monkey-patching approach
-# - implement additional helpers like automated findwait_for_element, download (see horejsek wrapper or selgym)
-#   alternatively: derived class with redefinition and call of super method?
 
 # TODO Test:
 # - n. a.
@@ -640,7 +638,6 @@ def find_elements_shadowdom(
                 if shadowroot is None:
                     err_msg = "Provided webelement is neither a ShadowRoot nor a ShadowHost."
                     raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
-                    return None
             # overcome issue with id attribute, discovered missing in JSON return when accessing shadow root in May 2025
             if not hasattr(shadowroot, "id"):
                 shadowroot.id = shadowroot._id  # type: ignore[misc]
@@ -990,11 +987,12 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                     #     if hasattr(webdriver, "closepopup_logger"):
                     #         webdriver.closepopup_logger.info(f"ShadowDOM host not unique\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                     #     continue
-                    shadowroot = webdriver.find_root_shadowdom(locator_shadowdomhost, webdriver.closepopup_logger.info, raise_exception=False)
+                    shadowroot = webdriver.find_root_shadowdom(locator_shadowdomhost, webdriver.closepopup_logger.info if hasattr(webdriver, "closepopup_logger") else None, raise_exception=False)
                     if shadowroot is not None:
                         webelts = shadowroot.find_elements(*locator_click)
                     else:
-                        webdriver.closepopup_logger.info(f"ShadowDOM root not found \t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
+                        if hasattr(webdriver, "closepopup_logger"):
+                            webdriver.closepopup_logger.info(f"ShadowDOM root not found \t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                 else:
                     if utils_seleniumxp.locatorutils.check_locator(locator_click, {utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR}):
                         webelts = parsedhtml.css_or_xpath(locator_click).getall()

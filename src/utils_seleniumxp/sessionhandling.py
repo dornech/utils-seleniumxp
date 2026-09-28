@@ -23,7 +23,7 @@ Currently full support is implemented for Chrome and Firefox only.
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B006, B008, B010, E501, PLC0415, PLR0914, PLR0917, PLR1702, PLR2004, RUF022, S101, S110, S113, SIM102
+# ruff: noqa: B006, B008, B010, E501, PLC0415, PLR0914, PLR0917, PLR1702, PLR2004, RUF022, RUF050, RUF105, S101, S110, S113, SIM102
 #
 # disable mypy errors
 # mypy: disable-error-code = "attr-defined, arg-type, call-overload, no-any-return, unused-ignore"
@@ -90,7 +90,7 @@ __all__ = [
     'disablenotifications',
     'connectChrome', 'connect_chrome',
     'checkDebugport', 'check_debugport',
-    'getChromeUserDataDir', 'get_Chrome_userdata_dir'
+    'getChromeUserDataDir', 'get_chrome_userdata_dir'
 ]
 
 
@@ -125,7 +125,7 @@ def init_webdriver(
     optimizedscraping: bool = optimizedscraping_default,
     URL: str = "about:blank",
     alt_cls_webdriverwrapper: type[utils_seleniumxp._RemoteWebDriver] | None = None,
-    alt_cls_options: type[utils_seleniumxp.WebDriver.ChromeOptions] | type[utils_seleniumxp.WebDriver.FirefoxOptions] | None = None
+    alt_cls_options: type[utils_seleniumxp.ChromeOptions] | type[utils_seleniumxp.FirefoxOptions] | None = None
 ) -> utils_seleniumxp._RemoteWebDriver:
     """
     init_webdriver - initialize Selenium webdriver session
@@ -160,7 +160,7 @@ def init_webdriver(
         optimizedscraping (bool, optional): flag to control optimized settings for scraping (no pictures etc.). Defaults to optimizedscraping_default.
         URL (str, optional): start URL. Defaults to "about:blank".
         alt_cls_webdriverwrapper (Optional[utils_seleniumxp.WebDriver], optional): optional base webdriver class. Defaults to None.
-        alt_cls_options (Union[utils_seleniumxp.WebDriver.ChromeOptions, utils_seleniumxp.WebDriver.FirefoxOptions, None], optional): optional browser options class. Defaults to None.
+        alt_cls_options (Union[utils_seleniumxp.ChromeOptions, utils_seleniumxp.FirefoxOptions, None], optional): optional browser options class. Defaults to None.
 
     Returns:
         utils_seleniumxp.WebDriver: webdriver object
@@ -307,9 +307,9 @@ def init_webdriver(
     if browser == "chrome":
 
         # set options object - some wrappers define own options class
-        browsersettings = utils_seleniumxp.WebDriver.ChromeOptions() if alt_cls_options is None else alt_cls_options()
+        browsersettings = utils_seleniumxp.ChromeOptions() if alt_cls_options is None else alt_cls_options()
         assert (
-            isinstance(browsersettings, utils_seleniumxp.WebDriver.ChromeOptions) or
+            isinstance(browsersettings, utils_seleniumxp.ChromeOptions) or
             browsersettings.__class__.__name__ == "ChromeOptions"
         )
 
@@ -333,7 +333,7 @@ def init_webdriver(
         # https://github.com/ultrafunkamsterdam/undetected-chromedriver/discussions/2282
         # if alt_cls_webdriverwrapper is not None and alt_cls_webdriverwrapper.__module__ in {'undetected_chromedriver'}:
         #     browsersettings.add_argument("--disable-dev-shm-usage")
-        #    browsersettings.add_argument("--disable-blink-features=AutomationControlled")
+        #     browsersettings.add_argument("--disable-blink-features=AutomationControlled")
         # settings in addition to stealth extension from stackoverflow
         # https://stackoverflow.com/questions/53039551/selenium-webdriver-modifying-navigator-webdriver-flag-to-prevent-selenium-detec
         # https://stackoverflow.com/questions/67341346/how-to-bypass-cloudflare-bot-protection-in-selenium
@@ -356,8 +356,8 @@ def init_webdriver(
     elif browser == "firefox":
 
         # set options object - some wrappers define own options class
-        browsersettings = utils_seleniumxp.WebDriver.FirefoxOptions() if alt_cls_options is None else alt_cls_options()
-        assert isinstance(browsersettings, utils_seleniumxp._RemoteWebDriver.FireFoxOptions)
+        browsersettings = utils_seleniumxp.FirefoxOptions() if alt_cls_options is None else alt_cls_options()
+        assert isinstance(browsersettings, utils_seleniumxp.FireFoxOptions)
 
         # options / preferences
         if len(settings) > 0:
@@ -392,13 +392,13 @@ def init_webdriver(
 
     # instantiate Selenium webdriver + browser, load blank page
     if browser == "chrome":
-        cls_webdriver = utils_seleniumxp.WebDriver.Chrome
+        cls_webdriver = utils_seleniumxp.Chrome
         if alt_cls_webdriverwrapper is not None:
             if (browser.upper() in [mro_cls.__module__.upper() for mro_cls in alt_cls_webdriverwrapper.__mro__]) or \
                 ("selenium.webdriver.chrome.webdriver" in [mro_cls.__module__ for mro_cls in alt_cls_webdriverwrapper.__mro__]):
                 cls_webdriver = alt_cls_webdriverwrapper  # type: ignore[assignment]
     elif browser == "firefox":
-        cls_webdriver = utils_seleniumxp.WebDriver.Firefox  # type: ignore[assignment]
+        cls_webdriver = utils_seleniumxp.Firefox  # type: ignore[assignment]
         if alt_cls_webdriverwrapper is not None:
             if (browser.upper() in [mro_cls.__module__.upper() for mro_cls in alt_cls_webdriverwrapper.__mro__]) or \
                 ("selenium.webdriver.firefox.webdriver" in [mro_cls.__module__ for mro_cls in alt_cls_webdriverwrapper.__mro__]):
@@ -519,7 +519,7 @@ def initWebDriver(
     optimizedscraping: bool = optimizedscraping_default,
     URL: str = "about:blank",
     alt_cls_webdriverwrapper: utils_seleniumxp._RemoteWebDriver | None = None,
-    alt_cls_options: utils_seleniumxp.WebDriver.ChromeOptions | utils_seleniumxp.WebDriver.FirefoxOptions | None = None
+    alt_cls_options: utils_seleniumxp.ChromeOptions | utils_seleniumxp.FirefoxOptions | None = None
 ) -> utils_seleniumxp._RemoteWebDriver:
     """
     initWebDriver - initialize Selenium webdriver session
@@ -554,7 +554,7 @@ def initWebDriver(
         optimizedscraping (bool, optional): flag to control optimized settings for scraping (no pictures etc.). Defaults to optimizedscraping_default.
         URL (str, optional): start URL. Defaults to "about:blank".
         alt_cls_webdriverwrapper (Optional[utils_seleniumxp.WebDriver], optional): optional base webdriver class. Defaults to None.
-        alt_cls_options (Union[utils_seleniumxp.WebDriver.ChromeOptions, utils_seleniumxp.WebDriver.FirefoxOptions, None], optional): optional browser options class. Defaults to None.
+        alt_cls_options (Union[utils_seleniumxp.ChromeOptions, utils_seleniumxp.FirefoxOptions, None], optional): optional browser options class. Defaults to None.
 
     Returns:
         utils_seleniumxp.WebDriver: webdriver object
@@ -663,17 +663,17 @@ def connect_chrome(
                     os.environ["PATH"] += os.pathsep + driverpath  # type: ignore[operator]
 
     # create browser options / profile object and set preferences
-    browsersettings = utils_seleniumxp.WebDriver.ChromeOptions()
+    browsersettings = utils_seleniumxp.ChromeOptions()
     # connect to existing browser instance via debug-port (chrome only)
     browsersettings.add_experimental_option("debuggerAddress", f"localhost:{debugport}")
 
     # instantiate Selenium webdriver, load blank page
     if mixin or utils_seleniumxp.mixinactive:
-        webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedin(utils_seleniumxp.WebDriver.Chrome)(
+        webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedin(utils_seleniumxp.Chrome)(
             options=browsersettings
         )
     else:
-        webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedinOnly3rdParty(utils_seleniumxp.WebDriver.Chrome)(
+        webdriver = utils_seleniumxp.webdriver_addon.WebDriverMixedinOnly3rdParty(utils_seleniumxp.Chrome)(
             options=browsersettings
         )
     if eventlistener is not None:
@@ -1019,9 +1019,9 @@ def getChromeUserDataDir(webdriver: utils_seleniumxp._RemoteWebDriver | None = N
                     return arg.split("=", 1)[1]
     return None
 
-def get_Chrome_userdata_dir(webdriver: utils_seleniumxp._RemoteWebDriver | None) -> str | None:
+def get_chrome_userdata_dir(webdriver: utils_seleniumxp._RemoteWebDriver | None) -> str | None:
     """
-    get_Chrome_userdata_dir - get user-data directory set in commandline
+    get_chrome_userdata_dir - get user-data directory set in commandline
 
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver object

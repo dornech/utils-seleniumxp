@@ -34,7 +34,7 @@ provided for enabling a direct download, disabling browser notifications or opti
 
 The webelement extension are done via setattr only. Implementing a mixin class would require
 to modify webdriver methods to return the new class with the mixin. So benefit of the
-settattr approach is that extending the webelement class is independend from changes to the
+settattr approach is that extending the webelement class is independent from changes to the
 webdriver class.
 
 The package also provides an extended event-firing webdriver class.
@@ -70,7 +70,13 @@ from utils_seleniumxp.version import __version__
 #   package: import <selenium.xxx> as <SeleniumBinding short name>
 #   use: from UtilsSeleniumXP import <SeleniumBinding short name>
 
-from selenium import webdriver as WebDriver
+# from selenium import webdriver as WebDriver
+from selenium.webdriver.chrome.webdriver import WebDriver as Chrome
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+# from selenium.webdriver.common.webdriver import LocalWebDriver as _LocalWebDriver
+from selenium.webdriver.remote.webdriver import WebDriver as WebDriver
 from selenium.webdriver.remote.webdriver import WebDriver as _RemoteWebDriver
 from selenium.webdriver.remote.webelement import WebElement as _WebElement
 from selenium.webdriver.remote.shadowroot import ShadowRoot as _ShadowRoot
