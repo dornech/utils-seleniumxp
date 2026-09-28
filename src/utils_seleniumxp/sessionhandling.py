@@ -444,15 +444,6 @@ def init_webdriver(
     if implicitlywait != 0:
         webdriver.implicitly_wait(implicitlywait)
 
-    if smartwait:
-        if smartwait_mode == "autowait":
-            from selenium_autowait import enable_autowait
-            enable_autowait(timeout=5.0)
-        elif smartwait_mode == "waitless":
-            from waitless import stabilize
-            webdriver = stabilize(webdriver)
-        webdriver._smartwait_mode = smartwait_mode
-
     # set maxpage load
     if maxpageload != 0:
         webdriver.set_page_load_timeout(maxpageload)
@@ -496,6 +487,17 @@ def init_webdriver(
 
     # set logging for closing popups
     set_log_closepopup(webdriver, config, inisection)
+
+    # activate smartwait
+    # NOTE: smartwait with waitless creates a wrapper -> potential inner class must be complete before calling
+    if smartwait:
+        if smartwait_mode == "autowait":
+            from selenium_autowait import enable_autowait
+            enable_autowait(timeout=5.0)
+        elif smartwait_mode == "waitless":
+            from waitless import stabilize
+            webdriver = stabilize(webdriver)
+        webdriver._smartwait_mode = smartwait_mode
 
     # make sure closepopup log is closed when application ends
     atexit.register(close_log_closepopup, webdriver)
@@ -683,7 +685,11 @@ def connect_chrome(
             webdriver = utils_seleniumxp.webdriver_addon.EventFiringWebDriverExtendedMixedin(webdriver, eventlistener)  # type: ignore[assignment]
     # webdriver.get("about:blank")
 
+    # set logging for closepopup
+    set_log_closepopup(webdriver, config, inisection)
+
     # activate smartwait
+    # NOTE: smartwait with waitless creates a wrapper -> potential inner class must be complete before calling
     if smartwait:
         if smartwait_mode == "autowait":
             from selenium_autowait import enable_autowait
@@ -692,9 +698,6 @@ def connect_chrome(
             from waitless import stabilize
             webdriver = stabilize(webdriver)
         webdriver._smartwait_mode = smartwait_mode
-
-    # set logging for closepopup
-    set_log_closepopup(webdriver, config, inisection)
 
     # get URL
     if URL != "about:blank":
