@@ -26,7 +26,7 @@ Currently full support is implemented for Chrome and Firefox only.
 # ruff: noqa: B006, B008, B010, E501, PLC0415, PLR0914, PLR0917, PLR1702, PLR2004, RUF022, RUF050, RUF105, S101, S110, S113, SIM102
 #
 # disable mypy errors
-# mypy: disable-error-code = "attr-defined, arg-type, call-overload, no-any-return, unused-ignore"
+# mypy: disable-error-code = "arg-type, attr-defined, call-overload, no-any-return, unused-ignore"
 
 # fmt: off
 
@@ -308,10 +308,7 @@ def init_webdriver(
 
         # set options object - some wrappers define own options class
         browsersettings = utils_seleniumxp.ChromeOptions() if alt_cls_options is None else alt_cls_options()
-        assert (
-            isinstance(browsersettings, utils_seleniumxp.ChromeOptions) or
-            browsersettings.__class__.__name__ == "ChromeOptions"
-        )
+        assert isinstance(browsersettings, utils_seleniumxp.ChromeOptions)
 
         # options / preferences
         prefsdict: dict = {}
