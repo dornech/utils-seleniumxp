@@ -15,7 +15,7 @@ module providing Selenium locator tools
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B006, TID252
+# ruff: noqa: B006, RUF105, TID252
 #
 # disable mypy errors
 # mypy: disable-error-code = "attr-defined, no-any-return"

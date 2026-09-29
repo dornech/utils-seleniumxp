@@ -17,7 +17,7 @@ the Selenium project including not covered standard functions
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B006, PLR0904, PLR5501, PLR6301
+# ruff: noqa: B006, PLR0904, PLR5501, PLR6301, RUF105
 
 # fmt: off
 

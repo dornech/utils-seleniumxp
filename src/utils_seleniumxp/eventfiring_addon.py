@@ -15,7 +15,7 @@ module providing event firing and listening - additional functionalities compare
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B006, E301, PLR0904, PLR0917, SIM102
+# ruff: noqa: B006, E301, PLR0904, PLR0917, RUF105, SIM102
 #
 # disable mypy errors
 # - mypy error "Returning Any from function ..."
