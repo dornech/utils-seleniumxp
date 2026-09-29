@@ -14,5 +14,5 @@
 import pytest
 
 
-def test_dummy():
+def test_dummy():  # docsig: disable=SIG101
     pass
