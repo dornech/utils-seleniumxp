@@ -2,7 +2,83 @@
 
 
 
+## [v1.2.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.2.0)  (2026-09-29) 
+
+### Features
+
+- Template improvements and fixes - allow browser tests in GitHub Action by adding optional Chrome installer action
+(['93c0e60'](https://github.com/dornech/utils-seleniumxp/commit/93c0e603f2a59df1c91ebd661b9839f033cc3e5c))
+- Template improvements - reorganize/group tests, dependency check in pre-commit
+(['fb94f3e'](https://github.com/dornech/utils-seleniumxp/commit/fb94f3e81d70e2a24545fe70838efe8f92e54a7c))
+- Add optimized wait functionality, improve atexit-routine
+(['29d0bdc'](https://github.com/dornech/utils-seleniumxp/commit/29d0bdc9dd62c5822da54d9388579e94284dcdfc))
+
+### Bug fixes
+
+- Further adjustment new ruff-version (RUF105) /2.
+(['6cecac3'](https://github.com/dornech/utils-seleniumxp/commit/6cecac3693bb6820d0e5591655a4ac161ef16402))
+- Further adjustment new ruff-version (RUF105)
+(['b7b8070'](https://github.com/dornech/utils-seleniumxp/commit/b7b8070e9ea31d2962c7d136e2952896493cea11))
+- Fix mypy error for typechecking browser-option in sessionhandling.py
+(['43fe7aa'](https://github.com/dornech/utils-seleniumxp/commit/43fe7aa25e0260a34099de913e70e039501caec0))
+- Error regarding ActionChain (subsequent error to correction of webdriver reference error)
+(['9681615'](https://github.com/dornech/utils-seleniumxp/commit/96816155abcee8f8465991a5c08835b588e52cb2))
+- Correct sessionhandling.py - activate smartwait must bei last step when opening session
+(['91880ac'](https://github.com/dornech/utils-seleniumxp/commit/91880acb10f64c3201cc84430efbd12312e9065e))
+- Adjustment new ruff-version, correction type annotations, correction for popup-logger
+(['2171b8a'](https://github.com/dornech/utils-seleniumxp/commit/2171b8ac821c62a9b9f039bb30f8d6da5ef62c02))
+- No testcases marked local considered in GitHub Action for build-test
+(['24af8e2'](https://github.com/dornech/utils-seleniumxp/commit/24af8e2dc2090d80287427efd3ebcecff7f59957))
+- Optimize GitHub actions resource usage, avoid especially very expensive macOS-actions
+(['e76969f'](https://github.com/dornech/utils-seleniumxp/commit/e76969fba96a3f200f90b085d1df188e7d361a86))
+- Correct pyproject.toml
+(['44164d3'](https://github.com/dornech/utils-seleniumxp/commit/44164d3da9abf130df305eb3b5d2a2c7af067adb))
+- Correct pyproject.toml
+(['c2b1f25'](https://github.com/dornech/utils-seleniumxp/commit/c2b1f25a3af8670073423187b501435ba5717079))
+- Get_Chrome_userdata_dir
+(['e7a7ec9'](https://github.com/dornech/utils-seleniumxp/commit/e7a7ec998e615af5aa798f69f198559e91b6b3e1))
+- Delete switch '--remote-debugging-pipe'
+(['35773fa'](https://github.com/dornech/utils-seleniumxp/commit/35773faac68986f1472ea235a97c4060a07aadfb))
+- Compatibility with undetected_chromedriver
+(['74401f5'](https://github.com/dornech/utils-seleniumxp/commit/74401f5762836592d77439128a73bc2c7fb9a330))
+- Adjust minimum Python version to 3.11 and other fixes
+(['5fa7035'](https://github.com/dornech/utils-seleniumxp/commit/5fa703591b521e4bb844f92ee106cbc9bb4aa020))
+- Update version.py
+(['32fe754'](https://github.com/dornech/utils-seleniumxp/commit/32fe7544682e48af1fa041a76c530252889a65d5))
+- Correct commitizen config
+(['ef4683d'](https://github.com/dornech/utils-seleniumxp/commit/ef4683d8e7361105bb46d6fbbded188b1916183e))
+
+### Testing
+
+
+### Build system
+
+- **deps**: Bump sigstore/gh-action-sigstore-python from 3.4.0 to 3.5.0
+ (['494256f'](https://github.com/dornech/utils-seleniumxp/commit/494256f5a8c364f2561ee49492b60f9d7096750d))
+- **deps**: Bump actions/setup-python from 6 to 7
+ (['50dfbd5'](https://github.com/dornech/utils-seleniumxp/commit/50dfbd5d9fffad9df46734ca73627d4c072fdf24))
+- **deps**: Bump actions/checkout from 6 to 7
+ (['b4ad5ff'](https://github.com/dornech/utils-seleniumxp/commit/b4ad5ffaafad87db0c8226a65a10f2787ea61e8e))
+
+### Chores
+
+- Disable new docsig rules SIG305, SIG306 in pyproject.toml
+(['3412cd7'](https://github.com/dornech/utils-seleniumxp/commit/3412cd75a428882b41042e58d3613ab1deacfbd2))
+
 ## [v1.1.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.1.0)  (2026-06-18) 
+
+### Features
+
+- Window.open logger
+(['e14cba8'](https://github.com/dornech/utils-seleniumxp/commit/e14cba80c6a692dcd12ba37de123295993ff3754))
+- Switch from mkdocs and mkdocs-theme material to properdocs with theme materialx
+(['a55c63c'](https://github.com/dornech/utils-seleniumxp/commit/a55c63cb4376f30fa08a3967929ebc8cb8d7047c))
+- Two new webelement functions set_focus, check_visible
+(['a1b7a6f'](https://github.com/dornech/utils-seleniumxp/commit/a1b7a6fff21591bc6a611a6ef95c09b93fb7d3d2))
+- Implement support for multi-level shadow DOM
+(['ac682ca'](https://github.com/dornech/utils-seleniumxp/commit/ac682ca1336a2bd96b866d76baab884e4c179faf))
+- Rework on extension handling (adopt BiDi implementation / new WebExtension subobject)
+(['49792a8'](https://github.com/dornech/utils-seleniumxp/commit/49792a8cfe185e89006b31ce5da541d9b5e58fc6))
 
 ### Bug fixes
 
@@ -26,6 +102,9 @@
 (['fde1c48'](https://github.com/dornech/utils-seleniumxp/commit/fde1c4890e86875d8ff45e20e2f459bc5c49f6cd))
 - Clean-up __init__.py
 (['27c5e7e'](https://github.com/dornech/utils-seleniumxp/commit/27c5e7ed9e9e5bae0db1b8c5a03a26ee42208c07))
+
+### Documentation
+
 
 ### Build system
 
@@ -68,23 +147,17 @@
 - Additional GitHub action - test documentation build
 (['32d07d9'](https://github.com/dornech/utils-seleniumxp/commit/32d07d9f1225e92584aca262dfd1d957b5e75e22))
 
-### Documentation
 
+## [v1.0.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.0.0)  (2025-10-28) 
 
 ### Features
 
-- Window.open logger
-(['e14cba8'](https://github.com/dornech/utils-seleniumxp/commit/e14cba80c6a692dcd12ba37de123295993ff3754))
-- Switch from mkdocs and mkdocs-theme material to properdocs with theme materialx
-(['a55c63c'](https://github.com/dornech/utils-seleniumxp/commit/a55c63cb4376f30fa08a3967929ebc8cb8d7047c))
-- Two new webelement functions set_focus, check_visible
-(['a1b7a6f'](https://github.com/dornech/utils-seleniumxp/commit/a1b7a6fff21591bc6a611a6ef95c09b93fb7d3d2))
-- Implement support for multi-level shadow DOM
-(['ac682ca'](https://github.com/dornech/utils-seleniumxp/commit/ac682ca1336a2bd96b866d76baab884e4c179faf))
-- Rework on extension handling (adopt BiDi implementation / new WebExtension subobject)
-(['49792a8'](https://github.com/dornech/utils-seleniumxp/commit/49792a8cfe185e89006b31ce5da541d9b5e58fc6))
-
-## [v1.0.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.0.0)  (2025-10-28) 
+- Check overlapped web elements
+(['90a1b07'](https://github.com/dornech/utils-seleniumxp/commit/90a1b0750ef172c999e58e7ed9a5f284466d46fc))
+- Include new version of hatch-vcs-footgun
+(['2c9ae52'](https://github.com/dornech/utils-seleniumxp/commit/2c9ae52d329bfab98fe4cbbc3b254b0acdbca580))
+- New method to determine CSS selector for webelement
+(['cd91131'](https://github.com/dornech/utils-seleniumxp/commit/cd91131fe407a9eeed78f67e474e8f4a925dcb51))
 
 ### Bug fixes
 
@@ -115,15 +188,6 @@
  (['fc30fe3'](https://github.com/dornech/utils-seleniumxp/commit/fc30fe3f17d139687a7e173891588a54ad8fbed8))
 - Initial commit
 (['eba0fc6'](https://github.com/dornech/utils-seleniumxp/commit/eba0fc692343296539aacc479c013feba7acc274))
-
-### Features
-
-- Check overlapped web elements
-(['90a1b07'](https://github.com/dornech/utils-seleniumxp/commit/90a1b0750ef172c999e58e7ed9a5f284466d46fc))
-- Include new version of hatch-vcs-footgun
-(['2c9ae52'](https://github.com/dornech/utils-seleniumxp/commit/2c9ae52d329bfab98fe4cbbc3b254b0acdbca580))
-- New method to determine CSS selector for webelement
-(['cd91131'](https://github.com/dornech/utils-seleniumxp/commit/cd91131fe407a9eeed78f67e474e8f4a925dcb51))
 
 ### Initial commit
 

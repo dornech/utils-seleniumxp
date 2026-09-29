@@ -21,7 +21,8 @@ license = { text = "GPL-3.0-only" }
 # keywords for easier look-up on PyPI
 keywords = [
     "Selenium", "webdriver", "Chrome", "FireFox",
-    "factory function", "event-firing webdriver", "parsel", "close popup",
+    "factory function", "event-firing webdriver", "close popup",
+    "parsel", "requests", "stealth-selenium", "waitless"
 ]
 authors = [
     { name = "dornech", email = "dornech@gmx.de" },
@@ -95,7 +96,7 @@ exclude = [
 [tool.commitizen]
 name = "cz_customize"
 version_scheme = "pep440"
-version = "1.1.0"
+version = "1.2.0"
 version_files = ["pyproject.toml:version"]
 tag_format = "v$version"
 # retry_after_failure = false
