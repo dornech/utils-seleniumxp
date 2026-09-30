@@ -15,12 +15,17 @@ The package consist of various helpers and extensions to the Selenium webdriver:
 
 Different from other packages extending the Selenium webdriver class this package does not work with
 wrapping the original webdriver but providing a mixin class or alternatively directly setting
-additional methods via 'setattr' in the original webdriver class. This is done and controlled
-via a pretty versatile custom factory function initializing the webdriver.
+additional methods via 'setattr' in the original webdriver class (monkey patching). This is done
+and controlled via a pretty versatile custom factory function initializing the webdriver.
+The factory function includes stealthenizing mechanism. Beside typical script injection techniques
+and for this reason to use pre-patched webdriver classes like "undetected chromedriver"
+or other pre-patched webdriver classes. However, using pre-patched webdriver classes is not limited
+to "undetected chromedriver"or patched classes for stealthenizing even the use of such functional enriched
+wrappers contradict to the choosen monkey patching approach of SeleniumXP.
 
 The webelement extensions are done via setattr only. Implementing a mixin class would require
-to modify webdriver methods to return the new class with the mixin. So benefit of the
-settattr approach is that extending the webelement class is independent from changes to the
+to modify webdriver methods to return the new class with the mixin. So benefit of the monkey patching
+approach with setattr is that extending the webelement class is independent from changes to the
 webdriver class.
 
 Note: as I am coming from camel case notation I was struggling a little bit with the Python naming conventions.

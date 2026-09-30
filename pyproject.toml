@@ -22,7 +22,7 @@ license = { text = "GPL-3.0-only" }
 keywords = [
     "Selenium", "webdriver", "Chrome", "FireFox",
     "factory function", "event-firing webdriver", "close popup",
-    "parsel", "requests", "stealth-selenium", "waitless"
+    "parsel", "requests", "shadow DOM", "stealth-selenium", "waitless"
 ]
 authors = [
     { name = "dornech", email = "dornech@gmx.de" },
