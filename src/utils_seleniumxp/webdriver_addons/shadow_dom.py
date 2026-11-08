@@ -18,7 +18,7 @@ submodule for shadow DOM access
 # boolean-type arguments
 # ruff: noqa: FBT001, FBT002
 # others
-# ruff: noqa: B010, E305, E501, PLR0914, PLR0917, PLR1702, PLR5501, PLW0717, RUF105, SIM102
+# ruff: noqa: B010, E305, E501, ISC002, PLR0914, PLR0917, PLR1702, PLR5501, PLW0717, RUF105, SIM102
 #
 # disable mypy errors
 # mypy: disable-error-code = "no-any-return, attr-defined"
@@ -37,7 +37,10 @@ submodule for shadow DOM access
 
 from collections.abc import Callable
 
+import logging
+
 import cssify
+import json
 
 import utils_seleniumxp
 
@@ -153,14 +156,14 @@ def find_root_shadowdom(
                 if debug:
                     shadowroot = _execute_find_shadowroot(
                         webdriver,
-                        f"return arguments[0].querySelector('{_prepare_selector(locator_list[i])}').shadowRoot",
+                        f"return arguments[0].querySelector({json.dumps(_prepare_selector(locator_list[i]))}).shadowRoot",
                         shadowroot,
                         f"Locator {locator_list[i]} is not a valid unique locator to a shadowDOM host.",
                         loggercall,
                         raise_exception
                     )
                 else:
-                    queryselector = queryselector + ".querySelector('" + _prepare_selector(locator_list[i]) + "').shadowRoot"
+                    queryselector += f".querySelector({json.dumps(_prepare_selector(locator_list[i]))}).shadowRoot"
             if not debug:
                 shadowroot = _execute_find_shadowroot(
                     webdriver,
@@ -199,12 +202,13 @@ def find_elements_shadowdom_simple(
     Returns:
         Optional[utils_seleniumxp._WebElement]: list of webelements in shadowDOM if found
     """
-    return find_elements_shadowdom(webdriver, [utils_seleniumxp.SeleniumLocator(by, value)], shadowroot)
+    return find_elements_shadowdom(webdriver, [utils_seleniumxp.SeleniumLocator(by, value)], shadowroot=shadowroot)
 
 # find elements in shadowDOM with support for nested shadowDOM
 def find_elements_shadowdom(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
+    js_condition: str | None = None,
     shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
 ) -> list[utils_seleniumxp._WebElement] | None:
     """
@@ -216,6 +220,7 @@ def find_elements_shadowdom(
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         locator_list (list[utils_seleniumxp.SeleniumLocator]): locator list
+        js_condition (str | None): javascript condition for leaf element. Defaults to None.
         shadowroot (Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
 
     Returns:
@@ -225,11 +230,18 @@ def find_elements_shadowdom(
     if not isinstance(locator_list, list):
         locator_list = [locator_list]
     if len(locator_list) > 1 or shadowroot is not None:
+        # prepare JS condition
+        if js_condition:
+            if "=>" not in js_condition:
+                js_condition = f"elt => elt.{js_condition}"
+        # determine queryselector
         queryselector = ""
         for i in range(0, len(locator_list) - 1):
-            queryselector = queryselector + ".querySelector('" + _prepare_selector(locator_list[i]) + "').shadowRoot"
-        queryselector = queryselector + ".querySelectorAll('" + _prepare_selector(locator_list[-1]) + "')"
+            queryselector += f".querySelector({json.dumps(_prepare_selector(locator_list[i]))}).shadowRoot"
+        queryselector += f".querySelectorAll({json.dumps(_prepare_selector(locator_list[-1]))})"
+        # execute fiond depneding on shadowroot
         if shadowroot is not None:
+            # check shadworoot
             if shadowroot.__class__.__name__ != "ShadowRoot":
                 # overcome issue that shadowDOM host but not root is provided
                 # try to treat shadowroot as host to derive correct root
@@ -244,13 +256,31 @@ def find_elements_shadowdom(
             if not hasattr(shadowroot, "id"):
                 shadowroot.id = shadowroot._id
             try:
-                return webdriver.execute_script(f"return arguments[0]{queryselector}", shadowroot)
+                if not js_condition:
+                    script = f"return arguments[0]{queryselector}"
+                    return webdriver.execute_script(script, shadowroot)
+                else:
+                    script = \
+                        f"var elts = Array.from(arguments[0]{queryselector}); " \
+                        f"elts = elts.filter({js_condition}); " \
+                        f"return elts"
+                    return webdriver.execute_script(script, shadowroot)
             except Exception:
+                logging.exception("error in find_elements_shadowdom")
                 return None
         else:
             try:
-                return webdriver.execute_script(f"return document{queryselector}")
+                if not js_condition:
+                    script = f"return document{queryselector}"
+                    return webdriver.execute_script(script)
+                else:
+                    script = \
+                        f"var elts = Array.from(document{queryselector}); " \
+                        f"elts = elts.filter({js_condition}); " \
+                        f"return elts"
+                    return webdriver.execute_script(script)
             except Exception:
+                logging.exception("error in find_elements_shadowdom")
                 return None
     else:
         err_msg = "No sufficient selector information provided to access element in shadowDOM."
@@ -275,13 +305,16 @@ def find_element_shadowdom_simple(
     Returns:
         Optional[utils_seleniumxp._WebElement]: webelement in shadowDOM if found
     """
-    return find_element_shadowdom(webdriver, [utils_seleniumxp.SeleniumLocator(by, value)], shadowroot)
+    return find_element_shadowdom(webdriver, [utils_seleniumxp.SeleniumLocator(by, value)], shadowroot=shadowroot)
 
 # find element in shadowDOM with support for nested shadowDOM and root element as optional parameter
 def find_element_shadowdom(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
-    shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
+    js_condition: str | None = None,
+    shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None,
+    raise_not_found: bool = False,
+    raise_not_unique: bool = False
 ) -> utils_seleniumxp._WebElement | None:
     """
     find_element_shadowdom - find element in shadowDOM with support for nested shadowDOM
@@ -291,26 +324,37 @@ def find_element_shadowdom(
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         locator_list (list[utils_seleniumxp.SeleniumLocator]): locator list
+        js_condition (str | None): javascript condition for leaf element. Defaults to None.
         shadowroot (Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
+        raise_not_found (bool): raise error if not found. Defaults to False.
+        raise_not_unique (bool): raise error if not unique. Defaults to False.
 
     Returns:
-        Optional[utils_seleniumxp._WebElement]: webelement in shadowDOM if found
+        Optional[utils_seleniumxp._WebElement]: webelement in shadowDOM if found else None (if no error raised)
     """
 
-    webelts = find_elements_shadowdom(webdriver, locator_list, shadowroot)
+    webelts = find_elements_shadowdom(webdriver, locator_list, js_condition, shadowroot)
     if webelts is not None and webelts != []:
         if len(webelts) == 1:
             return webelts[0]
         else:
-            err_msg = "Multiple elements for descriptor in shadowDOM"
-            raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+            if raise_not_unique:
+                err_msg = "Multiple elements for descriptor in shadowDOM"
+                raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+            else:
+                return webelts[0]
     else:
-        return None
+        if raise_not_found:
+            err_msg = "Element not found in shadowDOM"
+            raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
+        else:
+            return None
 
 # check if element present in shadowDOM with support for nested shadowDOM
 def is_present_shadowdom(
     webdriver: utils_seleniumxp._RemoteWebDriver,
     locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
+    js_condition: str | None = None,
     shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
 ) -> bool:
     """
@@ -321,13 +365,14 @@ def is_present_shadowdom(
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
         locator_list (list[utils_seleniumxp.SeleniumLocator]): locator list
+        js_condition (str | None): javascript condition for leaf element. Defaults to None.
         shadowroot (Union[utils_seleniumxp._ShadowRoot, utils_seleniumxp._WebElement]], optional): shadowDOM root. Defaults to None.
 
     Returns:
         bool: flag if element is present or not
     """
 
-    webelts = find_elements_shadowdom(webdriver, locator_list, shadowroot)
+    webelts = find_elements_shadowdom(webdriver, locator_list, js_condition, shadowroot)
     return webelts is not None and webelts != []
 
 # direct settattr instead of mixin-object but avoid name conflict
