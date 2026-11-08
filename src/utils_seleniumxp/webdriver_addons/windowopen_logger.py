@@ -50,6 +50,7 @@ def window_open_logger(webdriver: utils_seleniumxp._RemoteWebDriver) -> None:
     Args:
         webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
     """
+
     script_wol = """
         window.WindowOpenLogger = function(action) {
             // internal init

@@ -119,7 +119,9 @@ from utils_seleniumxp.locatorutils import SeleniumLocatorXPATH as SeleniumLocato
 from utils_seleniumxp.locatorutils import SeleniumLocatorCSS as SeleniumLocatorCSS
 from utils_seleniumxp.locatorutils import parameterizedSeleniumLocator as parameterizedSeleniumLocator
 from utils_seleniumxp.locatorutils import  parselSelectorExtension as parselSelectorExtension
+from utils_seleniumxp.eventlistener import SimpleEventListener
+
+# import modules to execute code
 import utils_seleniumxp.webdriver_addon as WebdriverAddOn
 import utils_seleniumxp.webelement_addon as WebelementAddOn
 import utils_seleniumxp.eventfiring_addon as EventFiringAddon
-from utils_seleniumxp.eventlistener import SimpleEventListener
