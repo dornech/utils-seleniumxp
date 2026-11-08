@@ -2,6 +2,35 @@
 
 
 
+## [v1.3.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.3.0)  (2026-11-09) 
+
+### Features
+
+- Improved access to shadow DOM and reduce error-proneness for selector expressions
+(['b5154e2'](https://github.com/dornech/utils-seleniumxp/commit/b5154e238c3a91fda57311d8b955fa4150d39b3d))
+- Add wait function via DOM observer in JavaScript
+(['c07e2d1'](https://github.com/dornech/utils-seleniumxp/commit/c07e2d1654cea1e0e686024aa4fc8e66458dcd42))
+
+### Bug fixes
+
+- Further correction of type annotations for docsig
+(['4fba45d'](https://github.com/dornech/utils-seleniumxp/commit/4fba45d38a617f9b700f1a560b9f2dc2ab950084))
+- Overrule mypy-check of hidden/protected attribute (safeguard to former Selenium error)
+(['02e01d8'](https://github.com/dornech/utils-seleniumxp/commit/02e01d8a949a2c767afb62a056e59733ff0d4045))
+- Dummy __init__.py required for subdirectory webdriver_addons (even not an own package) and further settings in pyproject.toml
+(['7e3549e'](https://github.com/dornech/utils-seleniumxp/commit/7e3549efd35b5defb1aa6b64a08b27f2fde77708))
+- Add missing caller stubs for new wait routines in mixin class, type annotation clean-ups
+(['4e06594'](https://github.com/dornech/utils-seleniumxp/commit/4e06594ce81bbb8679346ee2d3a0a8d0bb4001e4))
+- Reorganize code
+(['3d3f052'](https://github.com/dornech/utils-seleniumxp/commit/3d3f052f8939f7fedbe1c58a6c9ec58086898ed0))
+- Improve keywords and documentation
+(['89653f1'](https://github.com/dornech/utils-seleniumxp/commit/89653f1330ee5c4af08f5137af322d4fe791fcc6))
+
+### Chores
+
+- Minor editorial changes
+(['b230351'](https://github.com/dornech/utils-seleniumxp/commit/b230351e380fc2fba338c37b37276b74c64ebb26))
+
 ## [v1.2.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.2.0)  (2026-09-29) 
 
 ### Features
@@ -64,6 +93,7 @@
 
 - Disable new docsig rules SIG305, SIG306 in pyproject.toml
 (['3412cd7'](https://github.com/dornech/utils-seleniumxp/commit/3412cd75a428882b41042e58d3613ab1deacfbd2))
+
 
 ## [v1.1.0](https://github.com/dornech/utils-seleniumxp/releases/tag/v1.1.0)  (2026-06-18) 
 
