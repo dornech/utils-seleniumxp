@@ -254,7 +254,7 @@ def find_elements_shadowdom(
                     raise utils_seleniumxp.ErrorUtilsSelenium(err_msg)
             # overcome issue with id attribute, discovered missing in JSON return when accessing shadow root in May 2025
             if not hasattr(shadowroot, "id"):
-                shadowroot.id = shadowroot._id
+                shadowroot.id = shadowroot._id  # type: ignore
             try:
                 if not js_condition:
                     script = f"return arguments[0]{queryselector}"
