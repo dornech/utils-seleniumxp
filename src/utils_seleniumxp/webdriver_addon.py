@@ -623,11 +623,83 @@ def wait4HTMLstable(webdriver: utils_seleniumxp._RemoteWebDriver, wait: float = 
     else:
         return True
 
+# wait for DOM quiet - install DOM observer
+def install_dom_observer(webdriver):
+    """
+    install_dom_observer - inject javascript for dom observer
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
+    """
+
+    script_dom_observer = """
+        window.__domActivity = {
+            lastMutation: Date.now(),
+            count: 0
+        };
+
+        if (window.__domObserver) {
+            window.__domObserver.disconnect();
+        }
+
+        window.__domObserver = new MutationObserver(() => {
+            window.__domActivity.lastMutation = Date.now();
+            window.__domActivity.count++;
+        });
+
+        window.__domObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            characterData: true
+        });
+    """
+
+    webdriver.execute_script(script_dom_observer)
+
+# wait for DOM quiet - uninstall DOM observer
+def uninstall_dom_observer(webdriver):
+    """
+    uninstall_dom_observer - uninstall dom observer
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
+    """
+
+    script_dom_observer = """
+        if (window.__domObserver) {
+            window.__domObserver.disconnect();
+            window.__domObserver = null;
+        }
+    """
+
+    webdriver.execute_script(script_dom_observer)
+
+# wait for DOM quiet
+def wait_for_dom_quiet(webdriver, quiet_ms: int = 500, timeout: float = 15):
+    """
+    wait_for_dom_quiet - wait for quiet DOM i.e. no DOM change within quiet period
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
+        quiet_ms (int): ms DOM should be quiet. Defaults to 500.
+        timeout (float): timeout period. Defaults to 15
+    """
+
+    utils_seleniumxp.WebDriverWait(webdriver, timeout).until(
+        lambda d: d.execute_script("""
+            return Date.now() - window.__domActivity.lastMutation >= arguments[0];
+        """, quiet_ms)
+    )
 
 # direct setattr instead of mixin-object but avoid name conflict
 if not utils_seleniumxp.mixinactive:
     setattr(utils_seleniumxp._RemoteWebDriver, "wait4AJAX", wait4AJAX)
     setattr(utils_seleniumxp._RemoteWebDriver, "wait4HTMLstable", wait4HTMLstable)
+    setattr(utils_seleniumxp._RemoteWebDriver, "install_dom_observer", install_dom_observer)
+    setattr(utils_seleniumxp._RemoteWebDriver, "uninstall_dom_observer", uninstall_dom_observer)
+    setattr(utils_seleniumxp._RemoteWebDriver, "wait4DOMquiet", wait_for_dom_quiet)
+    setattr(utils_seleniumxp._RemoteWebDriver, "wait_for_dom_quiet", wait_for_dom_quiet)
 
 
 # extended wait for page load - source from ObeyTheTestingGoat
