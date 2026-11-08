@@ -220,6 +220,10 @@ class _WebDriverMixin:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         closewindows(self, keepwindows)
 
+    def close_windows(self, keepwindows: list) -> None:
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        closewindows(self, keepwindows)
+
     # mixin for window.open logger
 
     def window_open_logger(self) -> None:
@@ -570,6 +574,13 @@ def closewindows(webdriver: utils_seleniumxp._RemoteWebDriver, keepwindows: list
                 break
 
 def close_windows(webdriver: utils_seleniumxp._RemoteWebDriver, keepwindows: list) -> None:
+    """
+    close_windows - close windows except those in 'keeplist'
+
+    Args:
+        webdriver (utils_seleniumxp._RemoteWebDriver): webdriver
+        keepwindows (list): list with windows to keep
+    """
 
     closewindows(webdriver, keepwindows)
 
@@ -651,7 +662,7 @@ def wait4HTMLstable(webdriver: utils_seleniumxp._RemoteWebDriver, wait: float = 
         return True
 
 # wait for DOM quiet - install DOM observer
-def install_dom_observer(webdriver):
+def install_dom_observer(webdriver) -> None:
     """
     install_dom_observer - inject javascript for dom observer
 
@@ -685,7 +696,7 @@ def install_dom_observer(webdriver):
     webdriver.execute_script(script_dom_observer)
 
 # wait for DOM quiet - uninstall DOM observer
-def uninstall_dom_observer(webdriver):
+def uninstall_dom_observer(webdriver) -> None:
     """
     uninstall_dom_observer - uninstall dom observer
 
@@ -703,7 +714,7 @@ def uninstall_dom_observer(webdriver):
     webdriver.execute_script(script_dom_observer)
 
 # wait for DOM quiet
-def wait_for_dom_quiet(webdriver, quiet_ms: int = 500, timeout: float = 15):
+def wait_for_dom_quiet(webdriver, quiet_ms: int = 500, timeout: float = 15) -> None:
     """
     wait_for_dom_quiet - wait for quiet DOM i.e. no DOM change within quiet period
 
