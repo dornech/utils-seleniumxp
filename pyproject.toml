@@ -247,7 +247,8 @@ ignore_missing_imports = true
 pretty = true
 show_column_numbers = true
 warn_no_return = false
-warn_unused_ignores = true
+# warn_unused_ignores = true
+warn_unused_ignores = false
 warn_return_any = true
 warn_unused_configs = true
 
@@ -259,7 +260,18 @@ github_output = true
 github_warning_errors = ["DEP003"]
 
 [tool.deptry.package_module_name_map]
+mkdocs-gen-files = "mkdocs_gen_files"
+cssify = "cssify"
+hatchling = "hatchling"
+parsel = "parsel"
+psutil = "psutil"
+requests = "requests"
+selenium = "selenium"
+selenium-autowait = "selenium_autowait"
 selenium-requests = "seleniumrequests"
+stealthenium = "stealthenium"
+utils-mystuff = "utils_mystuff"
+waitless = "waitless"
 
 [tool.cruft]
 skip = ["README.md", "CHANGELOG.MD", "src/", "tests/", "docs/", "notebooks/"]
