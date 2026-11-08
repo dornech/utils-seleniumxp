@@ -128,10 +128,13 @@ class _WebDriverMixin:
         return find_elements_shadowdom_simple(self, by, value, shadowroot)
 
     def find_elements_shadowdom(
-        self, locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator], shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
+        self,
+        locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
+        js_condition: str | None = None,
+        shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
     ) -> list[utils_seleniumxp._WebElement] | None:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
-        return find_elements_shadowdom(self, locator_list, shadowroot)
+        return find_elements_shadowdom(self, locator_list, js_condition, shadowroot)
 
     def find_element_shadowdom_simple(
         self, by: utils_seleniumxp.By, value: str, shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement
@@ -140,24 +143,35 @@ class _WebDriverMixin:
         return find_element_shadowdom_simple(self, by, value, shadowroot)
 
     def find_element_shadowdom(
-        self, locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator], shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
+        self,
+        locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
+        js_condition: str | None = None,
+        shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None,
+        raise_not_found: bool = False,
+        raise_not_unique: bool = False
     ) -> utils_seleniumxp._WebElement | None:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
-        return find_element_shadowdom(self, locator_list, shadowroot)
+        return find_element_shadowdom(self, locator_list, js_condition, shadowroot, raise_not_found, raise_not_unique)
 
     # mixin for is_present_shadowdom / is_element_present_shadowdom
 
     def is_present_shadowdom(
-        self, locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator], shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
+        self,
+        locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
+        js_condition: str | None = None,
+        shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
     ) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
-        return is_present_shadowdom(self, locator_list, shadowroot)
+        return is_present_shadowdom(self, locator_list, js_condition, shadowroot)
 
     def is_element_present_shadowdom(
-        self, locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator], shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
+        self,
+        locator_list: utils_seleniumxp.SeleniumLocator | list[utils_seleniumxp.SeleniumLocator],
+        js_condition: str | None = None,
+        shadowroot: utils_seleniumxp._ShadowRoot | utils_seleniumxp._WebElement | None = None
     ) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
-        return is_present_shadowdom(self, locator_list, shadowroot)
+        return is_present_shadowdom(self, locator_list, js_condition, shadowroot)
 
     # mixin for hover over element
     def hover_over_element(
@@ -236,7 +250,7 @@ class _WebDriverMixin:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return status_wol(self)
 
-    # mixin for wait4AJAX and wait4HTMLstable
+    # mixin for wait4AJAX, wait4HTMLstable and wait for DOM via DOM observer
 
     def wait4AJAX(self, timeout: int = 15, min_wait: float = 0.0) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
@@ -245,6 +259,19 @@ class _WebDriverMixin:
     def wait4HTMLstable(self, wait: float = 0.1, max_wait: float = 0.5) -> bool:
         assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
         return wait4HTMLstable(self, wait, max_wait)
+
+    def install_dom_observer(self):
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        return install_dom_observer(self)
+
+    def uninstall_dom_observer(self):
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        return uninstall_dom_observer(self)
+
+    def wait_for_dom_quiet(self, quiet_ms: int = 500, timeout: float = 15):
+        assert isinstance(self, utils_seleniumxp._RemoteWebDriver)
+        return wait_for_dom_quiet(self, quiet_ms, timeout)
+
 
     # extended wait for page load - source from ObeytheTestingGoat
     def wait_for_page_load(self, timeout=10) -> contextlib.AbstractContextManager:

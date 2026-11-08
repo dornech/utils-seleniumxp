@@ -21,7 +21,7 @@ submodule for close popups
 # ruff: noqa: B010, E305, E501, PLR0914, PLR0917, PLR1702, PLR5501, PLW0717, RUF105, SIM102
 #
 # disable mypy errors
-# mypy: disable-error-code = "no-any-return, attr-defined"
+# mypy: disable-error-code = "arg-type, attr-defined, no-any-return"
 
 # fmt: off
 
@@ -180,7 +180,7 @@ def closepopup_queueprocessing(webdriver: utils_seleniumxp._RemoteWebDriver, fir
                             webdriver.closepopup_logger.info(f"FRAME not found\t{webdriver.current_url}\t({locator_click})\t({locator_iframe})\t({locator_shadowdomhost})")
                         continue
                     elif len(frames) == 1:
-                        utils_seleniumxp.WebDriverWait(webdriver, wait_iframe).until(utils_seleniumxp.ExpectedConditions.frame_to_be_available_and_switch_to_it(locator_iframe))
+                        utils_seleniumxp.WebDriverWait(webdriver, wait_iframe).until(utils_seleniumxp.ExpectedConditions.frame_to_be_available_and_switch_to_it(tuple(locator_iframe)))
                         # shadowDOM cannot be evaluated via parsel / lxml but first node always not in shadowDOM
                         if (utils_seleniumxp.locatorutils.check_locator(locator_click, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR]) or
                             utils_seleniumxp.locatorutils.check_locatorlist(locator_shadowdomhost, [utils_seleniumxp.By.XPATH, utils_seleniumxp.By.CSS_SELECTOR])
